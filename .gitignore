@@ -136,3 +136,5 @@ api/index.py.backup
 *.backup
 storage.json
 django.cmd
+
+.VSCodeCounter/
