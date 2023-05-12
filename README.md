@@ -1,24 +1,34 @@
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fhello-world&demo-title=Python%20Hello%20World&demo-description=Use%20Python%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fpython-hello-world.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994600/random/python.png)
+# Python Warehouse bot
 
-# Python Hello World
+![](https://img.shields.io/badge/python-v3.10-informational) ![](https://img.shields.io/badge/aiogram-v2.25.1-informational)
 
-This example shows how to use Python on Vercel with Serverless Functions using the [Python Runtime](https://vercel.com/docs/concepts/functions/serverless-functions/runtimes/python).
 
-## Demo
-
-https://python-hello-world.vercel.app/
+This is bot for warehouse accounting
 
 ## Running Locally
+####To be done later
 
-```bash
-npm i -g vercel
-vercel dev
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install -r requirements.txt
+python -m app
 ```
+Also requires .env file like this:
+```
+SERVERLESS=True
+NGROK=True
+API_TOKEN=[YOUR API TOKEN]
+DB_LOGIN=
+DB_PASSWORD=
+DB_API_URL=[URL]
+ADMIN_NUMBER=
+WEBHOOK_HOST=[URL]
+WEBAPP_HOST=127.0.0.1
+WEBAPP_PORT=5000
+```
+Webhook host will only be used only if SERVERLESS=True and NGROK=False.
 
-Your Python API is now available at `http://localhost:3000/api`.
-
-## One-Click Deploy
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fhello-world&demo-title=Python%20Hello%20World&demo-description=Use%20Python%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fpython-hello-world.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994600/random/python.png)
+Database is REST API Service, specifically this:
+[WarehouseDatabase](https://github.com/valentinkelbakh/WarehouseDatabase "WarehouseDatabase")
