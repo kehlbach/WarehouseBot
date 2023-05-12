@@ -30,6 +30,9 @@ WEBHOOK_HOST=[URL]
 WEBAPP_HOST=127.0.0.1
 WEBAPP_PORT=5000
 ```
+SERVERLESS=True for webhook or False for longpoll.
+
+App can use ngrok for webhook
 Webhook host will only be used only if SERVERLESS=True and NGROK=False.
 
 Database is REST API Service, specifically this:
