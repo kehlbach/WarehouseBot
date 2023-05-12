@@ -8,14 +8,16 @@ This is bot for warehouse accounting
 ## Running Locally
 #### To be done later
 
-
+Brief example with venv
 ```cmd
+git clone https://github.com/valentinkelbakh/WarehouseBot.git
+cd WarehouseBot
 python -m venv .venv
 .venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
 python -m app
 ```
-Also requires .env file like this:
+Also requires .env file like this :
 ```
 SERVERLESS=True
 NGROK=True
