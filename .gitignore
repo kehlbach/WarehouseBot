@@ -138,3 +138,4 @@ storage.json
 django.cmd
 
 .VSCodeCounter/
+app/tests.py
