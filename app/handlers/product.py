@@ -2,19 +2,16 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 
-# from app.data.constants import *
 from app.data import callbacks as cb
-from app.data.constants import DELETE, EDIT, ROLES, VIEW
+from app.data.constants import DELETE, EDIT, VIEW
 from app.keyboards import *
 from app.loader import bot, db, dp
-from app.data.states import Role
 from app.utils import tools
 from app.utils.processors import *
 
-
-
-
 """create edit_product_init"""
+
+
 @dp.callback_query_handler(cb.generic.filter(state=Product.Edit.MENU), state='*')
 async def edit_product_init(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     master_user_id = callback_query.from_user.id
@@ -27,10 +24,7 @@ async def edit_product_init(callback_query: CallbackQuery, callback_data: dict, 
         text += '\nАртикул (код товара): '+product['vendor_code']
         text += '\nКатегория: '+product['category_name']
         text += '\nЕдиницы измерения: '+product['units']
-        reply_markup = edit_product(
-            master,
-            product=product
-        )
+        reply_markup = edit_product(master, product=product)
     else:
         text = 'Нет доступа'
         reply_markup = None
@@ -41,13 +35,15 @@ async def edit_product_init(callback_query: CallbackQuery, callback_data: dict, 
         reply_markup=reply_markup
     )
 
+
 @dp.callback_query_handler(
     cb.product_category.filter(action=(
-                                Product.Edit.Category.MENU,
-                                Product.Create.Category.MENU,
-                                Product.Edit.Category.SPECIFIC,
-                                Product.Create.Category.SPECIFIC
-                                )), state='*'
+        Product.Edit.Category.MENU,
+        Product.Create.Category.MENU,
+        Product.Edit.Category.SPECIFIC,
+        Product.Create.Category.SPECIFIC
+    )),
+    state='*'
 )
 async def handle_product_edit_category(callback_query: CallbackQuery, callback_data: dict):
     action = callback_data['action']
@@ -65,23 +61,21 @@ async def handle_product_edit_category(callback_query: CallbackQuery, callback_d
                 Product.Edit.Category, page, callback_data['product_id'], categories_page)
         case Product.Create.Category.SPECIFIC:
             text = 'Товар успешно создан'
-            reply_markup = get_back(PRODUCTS,callback_data['product_id'])
+            reply_markup = get_back(PRODUCTS, callback_data['product_id'])
             db.edit_patch(
                 db.PRODUCTS, id=callback_data['product_id'], category=callback_data['category_id'])
         case Product.Edit.Category.SPECIFIC:
             changed_product = db.edit_patch(
                 db.PRODUCTS, id=callback_data['product_id'], category=callback_data['category_id'])
-            text = 'Категория успешно изменена на {}'.format( changed_product['category_name'])
-            reply_markup = get_back(PRODUCTS,callback_data['product_id'])
-    
-    # answer sending
+            text = 'Категория успешно изменена на {}'.format(changed_product['category_name'])
+            reply_markup = get_back(PRODUCTS, callback_data['product_id'])
+
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
         text=text,
         reply_markup=reply_markup
     )
-
 
 
 @dp.callback_query_handler(cb.generic.filter(action=(Product.Edit.DELETE)), state='*')
@@ -98,8 +92,8 @@ async def handle_product_delete(callback_query: CallbackQuery, callback_data: di
         text = 'Произошла ошибка при удалении товара.'
         logging.warning('⭕тут чет товар не удалился')
     return await bot.edit_message_text(
-        chat_id = callback_query.message.chat.id,
-        message_id = callback_query.message.message_id,
-        text = text,
-        reply_markup = reply_markup
+        chat_id=callback_query.message.chat.id,
+        message_id=callback_query.message.message_id,
+        text=text,
+        reply_markup=reply_markup
     )

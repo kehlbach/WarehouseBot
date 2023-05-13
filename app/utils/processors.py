@@ -6,12 +6,13 @@ import logging
 import re
 
 import phonenumbers
-from app.utils import NAME_PATTERN
-from app.loader import db
-from aiogram import filters, md, types
+from aiogram import types
+
+
 
 
 def name_validator(name) -> tuple[str,bool,str]:
+    from app.utils import NAME_PATTERN
     """Returns name, is_valid, error_text"""
     if re.match(NAME_PATTERN, name):
         is_valid = True
@@ -24,6 +25,7 @@ def name_validator(name) -> tuple[str,bool,str]:
 
 
 def number_preprocessor(message: types.Message, source_number: str = '',profiles = [], login = False) -> tuple[str,bool,str]:
+    from app.loader import db
     if message.contact:
         number = message.contact.phone_number
     else:

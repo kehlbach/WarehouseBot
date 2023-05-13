@@ -2,32 +2,29 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 
-from app.data.constants import *
 from app.data import callbacks as cb
+from app.data.constants import *
 from app.data.constants import DELETE, EDIT, PROFILES, VIEW
-from app.keyboards import get_back
-from app.keyboards import get_user_departments, get_user_roles, edit_user, btn_add_user
+from app.data.states import User
+from app.keyboards import (btn_add_user, edit_user, get_back,
+                           get_user_departments, get_user_roles)
 from app.loader import bot, db, dp
-from app.data.states import User, Generic
 from app.utils import tools
 from app.utils.processors import *
 
 
-@dp.callback_query_handler(
-    cb.user_departments.filter(
-        action=(
-            User.Edit.Departments.MENU,
-            User.Create.Departments.MENU,
-            User.Edit.Departments.DONE,
-            User.Create.Departments.DONE,
-            User.Edit.Departments.ALL,
-            User.Create.Departments.ALL,
-            User.Edit.Departments.SPECIFIC,
-            User.Create.Departments.SPECIFIC)),
+@dp.callback_query_handler(cb.user_departments.filter(
+    action=(
+        User.Edit.Departments.MENU,
+        User.Create.Departments.MENU,
+        User.Edit.Departments.DONE,
+        User.Create.Departments.DONE,
+        User.Edit.Departments.ALL,
+        User.Create.Departments.ALL,
+        User.Edit.Departments.SPECIFIC,
+        User.Create.Departments.SPECIFIC)),
     state='*')
 async def handle_user_edit_department(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
-    # data preparation
-    # data = loads(callback_data['data'])
     action = callback_data['action']
     page = callback_data.get('page', 1)
     if action in (User.Edit.Departments.MENU, User.Edit.Departments.ALL, User.Edit.Departments.SPECIFIC):
@@ -36,7 +33,7 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
         action_class = User.Create.Departments
 
     match callback_data['action']:
-        case  User.Edit.Departments.ALL | User.Create.Departments.ALL :
+        case  User.Edit.Departments.ALL | User.Create.Departments.ALL:
             text = 'Выберите отделения, с которыми пользователь может работать:'
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             all_departments = db.get(db.DEPARTMENTS)
@@ -65,7 +62,7 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
                 all_departments=all_departments,
                 departments_page=departments_page,
                 profile=profile
-            )            
+            )
         case User.Edit.Departments.SPECIFIC | User.Create.Departments.SPECIFIC:
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             all_departments = db.get(db.DEPARTMENTS)
@@ -85,15 +82,14 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
                 profile=profile
             )
         case User.Edit.Departments.DONE:
-            reply_markup = get_back(PROFILES,callback_data['profile_id'])
+            reply_markup = get_back(PROFILES, callback_data['profile_id'])
             text = 'Новые отделения успешно заданы.'
         case User.Create.Departments.DONE:
             text = 'Пользователь с номером {} создан'.format(
-                callback_data['phone_number'])       
-            reply_markup = get_back(PROFILES,callback_data['profile_id'])
+                callback_data['phone_number'])
+            reply_markup = get_back(PROFILES, callback_data['profile_id'])
             reply_markup.add(btn_add_user)
 
-    # answer sending
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
@@ -101,20 +97,17 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
         reply_markup=reply_markup
     )
 
-# handle_user_edit_role in manner of handle_user_edit_department with dispatcher
 
-
-@dp.callback_query_handler(
-    cb.user_role.filter(action=(User.Edit.Roles.MENU,
-                                User.Create.Roles.MENU,
-                                User.Edit.Roles.SPECIFIC,
-                                User.Create.Roles.SPECIFIC
-                                )),
+@dp.callback_query_handler(cb.user_role.filter(
+    action=(
+        User.Edit.Roles.MENU,
+        User.Create.Roles.MENU,
+        User.Edit.Roles.SPECIFIC,
+        User.Create.Roles.SPECIFIC
+    )),
     state='*'
 )
 async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
-    # data initialization
-    # if isinstance(callback_data['data'], str):
     action = callback_data['action']
     page = callback_data.get('page', 1)
 
@@ -122,9 +115,7 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
         case User.Create.Roles.MENU:
             text = 'Выберите роль пользователя:'
             roles_page = db.get_page(db.ROLES, page)
-            
-            reply_markup = get_user_roles(
-                User.Create.Roles, page, callback_data['profile_id'], roles_page)
+            reply_markup = get_user_roles(User.Create.Roles, page, callback_data['profile_id'], roles_page)
         case User.Edit.Roles.MENU:
             text = 'Выберите роль пользователя:'
             roles_page = db.get_page(db.ROLES, page)
@@ -151,9 +142,8 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
                 role=callback_data['role_id'])
             text = 'Роль успешно изменена. Новая роль - {}.'.format(
                 changed_user['role_name'])
-            reply_markup = get_back(PROFILES,callback_data['profile_id'])
+            reply_markup = get_back(PROFILES, callback_data['profile_id'])
 
-    # answer sending
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
@@ -161,10 +151,6 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
         reply_markup=reply_markup
     )
 
-
-
-
-# handle user delete like in handle_user_edit_department
 
 @dp.callback_query_handler(cb.generic.filter(action=(User.Edit.DELETE)), state='*')
 async def handle_user_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -185,12 +171,11 @@ async def handle_user_delete(callback_query: CallbackQuery, callback_data: dict,
 
 
 @dp.callback_query_handler(cb.generic.filter(state=User.Edit.MENU), state='*')
-async def edit_user_init (callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
+async def edit_user_init(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     master_user_id = callback_query.from_user.id
-    master = db.filter(db.PROFILES, user_id=master_user_id) # profile of button pusher
-    profile_id = callback_data['data']# from profile to edit
+    master = db.filter(db.PROFILES, user_id=master_user_id)
+    profile_id = callback_data['data']
     permissions = tools.permissions(master)
-
     if set([VIEW, EDIT, DELETE]).intersection(permissions[PROFILES]):
         profile = db.get(db.PROFILES, profile_id)
         all_departments = db.get(db.DEPARTMENTS)
@@ -217,7 +202,5 @@ async def edit_user_init (callback_query: CallbackQuery, callback_data: dict, st
             text=text,
             reply_markup=reply_markup
         )
-
     else:
         return await callback_query.answer('Нет прав')
-

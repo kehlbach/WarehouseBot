@@ -1,38 +1,19 @@
-import json
-from aiogram import __main__ as aiogram_core
-from aiogram import filters, md, types
-from aiogram.dispatcher.webhook import SendMessage
-from aiogram.types import CallbackQuery
+
 from aiogram.dispatcher import FSMContext
-from math import ceil
-from types import SimpleNamespace
-import phonenumbers
-from phonenumbers.phonenumberutil import NumberParseException
-#from app.data.cb import cb.base
-from app.data import callbacks as cb
-from app.keyboards.category import get_categories
-from app.keyboards.user import get_profiles
-from app.loader import bot, dp, db
-from app.data.constants.subjects import ALL_DEPARTMENTS
-from app.keyboards import *
+from aiogram.types import CallbackQuery
+
 from app import keyboards as kb
-from app.data.states import *
+from app.data import callbacks as cb
 from app.data.constants import *
+from app.data.states import *
+from app.keyboards import *
+from app.keyboards.category import get_categories
+from app.loader import bot, db, dp
 from app.utils import tools
-from copy import deepcopy
-# class User(StatesGroup):
-#    menu = State()
+
 from .login import _prepare_menu
 
-# class Menu (StatesGroup):
-#     main = State()
-#     users1 = State
 
-# @dp.callback_query_handler(lambda callback_query: callback_query.data == 'main_menu', state=User.menu)
-# #@dp.message_handler(state=User.menu)
-# async def process_menu_1(callback_query: CallbackQuery, state: FSMContext):
-#     await callback_query.answer("I see U:")
-#     await callback_query.message.answer(callback_query.data)
 @dp.callback_query_handler(cb.action.filter(action=Menu.INIT), state='*')
 @dp.callback_query_handler(cb.action.filter(action=Login.CHECK),state='*')
 async def process_menu_init(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -91,12 +72,3 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
 async def process_current_page(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     page = callback_data['page']
     await callback_query.answer('{} страница.'.format(page))
-
-
-
-
-# @dp.callback_query_handler(cb.base.filter())
-# async def catcher(callback_query: CallbackQuery, callback_data):
-#     #callback_data['data'] = json.loads(callback_data['data'])
-#     return await callback_query.answer('Срок действия кнопки истек.')
-

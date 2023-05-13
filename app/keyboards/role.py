@@ -1,3 +1,7 @@
+from json import dumps, loads
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 from app.data import callbacks as cb
 from app.data.constants import ADD, DELETE, EDIT, ROLES, VIEW
 from app.data.constants.actions import ALL_ACTIONS
@@ -7,20 +11,9 @@ from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-
-from copy import deepcopy
-from json import dumps, loads
-
-
 def get_roles(master: dict, roles_page: dict, page: int) -> InlineKeyboardMarkup:
     keyboard = get_back()
     permissions = tools.permissions(master)
-
-    cb_data = {
-        'state': Generic.CALLBACK_TO_MESSAGE_INIT,
-    }
 
     page_row = _get_pages(
         roles_page,
@@ -29,7 +22,6 @@ def get_roles(master: dict, roles_page: dict, page: int) -> InlineKeyboardMarkup
             state=Menu.CHOICE,
             action=Menu.ROLES,
             page=page))
-
 
     if ADD in permissions[ROLES]:
         cb_add_data = {
@@ -68,9 +60,7 @@ def edit_role(master, role):
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Role.Edit.NAME,
-                data=dumps(
-                    [cb_data['role_id']],
-                )
+                data=dumps([cb_data['role_id']],)
             )
         ))
         keyboard.add(InlineKeyboardButton(
@@ -78,11 +68,11 @@ def edit_role(master, role):
             callback_data=cb.role_permissions.new(
                 state=Role.Edit.Permissions.MENU,
                 action=Role.Edit.Permissions.MENU,
-                subject_id = '',
-                action_id = '',
-                role_id = cb_data['role_id'],
-                )
+                subject_id='',
+                action_id='',
+                role_id=cb_data['role_id'],
             )
+        )
         )
 
     if DELETE in permissions[ROLES]:
@@ -100,21 +90,16 @@ def get_role_permissions(
         role):
     keyboard = InlineKeyboardMarkup()
 
-
-    # callback preparation
     cb_data = {
         'state': '',
-        # 'action': action,
         'role_id': role['id']
     }
-    # pages preparation
-
 
     keyboard.add(InlineKeyboardButton(
         'Готово',
         callback_data=cb.role_permissions.new(
             action=action_class.DONE,
-            subject_id = '',
+            subject_id='',
             action_id='',
             **cb_data)))
     permissions = dict(loads(role['permissions']))
@@ -137,17 +122,16 @@ def get_role_permissions(
         ))
     return keyboard
 
+
 def get_role_permission(action_class: Role.Edit.Permissions | Role.Create.Permissions,
-                    role,
-                    subject_id):
+                        role,
+                        subject_id):
     keyboard = InlineKeyboardMarkup()
 
     cb_data = {
         'state': '',
-        # 'action': action,
         'role_id': role['id']
     }
-    # pages preparation
 
     keyboard.add(InlineKeyboardButton(
         'Назад',
@@ -165,14 +149,14 @@ def get_role_permission(action_class: Role.Edit.Permissions | Role.Create.Permis
     else:
         checked = '❌ '
     keyboard.add(InlineKeyboardButton(
-            checked+'Все разрешения',
-            callback_data=cb.role_permissions.new(
+        checked+'Все разрешения',
+        callback_data=cb.role_permissions.new(
                 action=action_class.ALL,
                 subject_id=subject_id,
                 action_id='',
                 **cb_data
-            )
-        ))
+        )
+    ))
 
     for action_id, action_name in ALL_ACTIONS.items():
         if action_id in permissions[subject_id]:
@@ -188,5 +172,5 @@ def get_role_permission(action_class: Role.Edit.Permissions | Role.Create.Permis
                 **cb_data
             )
         ))
-    
+
     return keyboard

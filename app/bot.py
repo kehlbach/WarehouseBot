@@ -4,15 +4,15 @@ from urllib.parse import urljoin
 from aiogram import Dispatcher, executor, types
 from pyngrok import ngrok
 
-# from pyngrok.exception import PyngrokNgrokError
 from app.utils.config import (NGROK, SERVERLESS, WEBAPP_HOST, WEBAPP_PORT,
-                             WEBHOOK_HOST,WEBHOOK_PATH)
+                              WEBHOOK_HOST, WEBHOOK_PATH)
 from app.loader import bot, dp
+
 
 logging.basicConfig(level=logging.INFO)
 
+
 async def on_startup(dispatcher: Dispatcher) -> None:
-    
     if SERVERLESS:
         if NGROK:
             WEBHOOK_PATH = ''
@@ -40,7 +40,6 @@ async def on_shutdown(dispatcher: Dispatcher) -> None:
         await bot.delete_webhook()
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
-
 
 
 def bot_register(webhook: bool = False) -> None:

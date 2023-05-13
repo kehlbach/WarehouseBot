@@ -1,20 +1,17 @@
+from json import dumps
+
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
+                           KeyboardButton, ReplyKeyboardMarkup)
+
 from app.data import callbacks as cb
 from app.data.constants import ADD, DELETE, EDIT, PRODUCTS, VIEW
-from app.data.constants.actions import ALL_ACTIONS
-from app.data.constants.subjects import ALL_SUBJECTS
 from app.data.states import Generic, Menu, Product
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
-
-
-from copy import deepcopy
-from json import dumps, loads
-
 kb_get_units = ReplyKeyboardMarkup(
     resize_keyboard=True,
-    one_time_keyboard=True,  # make the buttons smaller if there are more than 3
+    one_time_keyboard=True,
     keyboard=[
         [
             KeyboardButton(text='шт'),
@@ -29,8 +26,6 @@ kb_get_units = ReplyKeyboardMarkup(
 def get_products(master: dict, products_page: dict, page: int) -> InlineKeyboardMarkup:
     keyboard = get_back()
     permissions = tools.permissions(master)
-
-    #cb_data = {'state': Generic.CALLBACK_TO_MESSAGE_INIT}
 
     page_row = _get_pages(
         products_page,
@@ -139,13 +134,11 @@ def get_product_categories(
 ):
     keyboard = InlineKeyboardMarkup()
 
-    # callback preparation
     cb_data = {
         'state': Generic.CALLBACK_HANDLE,
         'page': page,
         'product_id': product_id}
     
-    # for pages row
     page_row = _get_pages(
         categories_page,
         cb.product_category,
@@ -154,7 +147,6 @@ def get_product_categories(
             category_id='',
             **cb_data))
     
-    # add buttons
     for each in categories_page['results']:
         keyboard.add(InlineKeyboardButton(
             each['repr'],
@@ -163,7 +155,6 @@ def get_product_categories(
                 category_id=each['id'],
                 **cb_data)))
         
-    # insert pages row
     if page_row:
         keyboard.row(*page_row)
 

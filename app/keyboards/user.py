@@ -1,22 +1,18 @@
+from json import dumps
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 from app.data import callbacks as cb
 from app.data.constants import ADD, DELETE, EDIT, PROFILES, VIEW
 from app.data.states import Generic, Menu, User
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
-
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-
-from copy import deepcopy
-from json import dumps
-
 btn_add_user = InlineKeyboardButton(
     'Добавить пользователя', callback_data=cb.generic.new(
         state= Generic.CALLBACK_TO_MESSAGE_INIT,
         action= User.Create.NUMBER,
         data= ''))
-
 
 def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
     """
@@ -46,7 +42,6 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
     if EDIT in permissions[PROFILES]:
         keyboard.add(InlineKeyboardButton(
             'Изменить имя',
-            # callback_data=cb.new(action=User.Edit.NAME, **cb_data)))
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=User.Edit.NAME,
@@ -94,10 +89,6 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
                 action=User.Edit.DELETE,
                 data=cb_data['profile_id'])))
 
-    # for pages row
-
-    # add buttons
-
     return keyboard
 
 
@@ -109,14 +100,11 @@ def get_user_departments(
         profile):
     keyboard = InlineKeyboardMarkup()
 
-    # callback preparation
     cb_data = {
         'state': '',
-        # 'action': action,
         'page': page,
         'profile_id': profile['id']
     }
-    # pages preparation
 
     page_row = _get_pages(
         departments_page,
@@ -169,14 +157,12 @@ def get_user_roles(
         roles_page):
     keyboard = InlineKeyboardMarkup()
 
-    # callback preparation
     cb_data = {
         'state': Generic.CALLBACK_HANDLE,
         'page': page,
         'profile_id': profile_id
     }
 
-    # for pages row
     page_row = _get_pages(
         roles_page,
         cb.user_role,
@@ -185,7 +171,6 @@ def get_user_roles(
             role_id='',
             **cb_data))
 
-    # add buttons
     for each in roles_page['results']:
         keyboard.add(InlineKeyboardButton(
             each['repr'],
@@ -194,7 +179,6 @@ def get_user_roles(
                 role_id=each['id'],
                 **cb_data)))
 
-    # insert pages row
     if page_row:
         keyboard.row(*page_row)
 
@@ -206,10 +190,6 @@ def get_user_roles(
 def get_profiles(master: dict, profiles_page: dict, page: int):
     keyboard = InlineKeyboardMarkup()
     permissions = tools.permissions(master)
-
-    cb_data = {
-        'state': Generic.CALLBACK_TO_MESSAGE_INIT,
-    }
 
     page_row = _get_pages(
         profiles_page,

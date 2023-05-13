@@ -1,17 +1,15 @@
+from json import dumps
+
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
+                           KeyboardButton, ReplyKeyboardMarkup)
+
 from app.data import callbacks as cb
 from app.data.constants import *
-from app.data.constants import ADD, CATEGORIES, DELETE, EDIT, VIEW
+from app.data.constants import ADD, DELETE, EDIT, VIEW
 from app.data.states import *
 from app.data.states import Department, Generic, Menu
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
-
-
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
-
-
-from copy import deepcopy
-from json import dumps
 
 edit_department_location = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 edit_department_location.add(KeyboardButton('Убрать адрес'))
@@ -20,18 +18,14 @@ edit_department_location.add(KeyboardButton('Убрать адрес'))
 def edit_department(master, department):
     keyboard = get_back(DEPARTMENTS)
     permissions = tools.permissions(master)
-
     cb_data = {'department_id': department['id']}
-
     if EDIT in permissions[DEPARTMENTS]:
         keyboard.add(InlineKeyboardButton(
             'Изменить название',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Department.Edit.NAME,
-                data=dumps(
-                    [cb_data['department_id']],
-                )
+                data=dumps([cb_data['department_id']],)
             )
         ))
         keyboard.add(InlineKeyboardButton(
@@ -39,9 +33,7 @@ def edit_department(master, department):
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Department.Edit.LOCATION,
-                data=dumps(
-                    [cb_data['department_id']],
-                )
+                data=dumps([cb_data['department_id']],)
             )
         ))
     if DELETE in permissions[DEPARTMENTS]:
@@ -54,14 +46,9 @@ def edit_department(master, department):
     return keyboard
 
 
-
 def get_departments(master: dict, departments_page: dict, page: int) -> InlineKeyboardMarkup:
     keyboard = get_back()
     permissions = tools.permissions(master)
-
-    cb_data = {
-        'state': Generic.CALLBACK_TO_MESSAGE_INIT,
-    }
 
     page_row = _get_pages(
         departments_page,
@@ -70,7 +57,6 @@ def get_departments(master: dict, departments_page: dict, page: int) -> InlineKe
             state=Menu.CHOICE,
             action=Menu.DEPARTMENTS,
             page=page))
-
 
     if ADD in permissions[DEPARTMENTS]:
         cb_add_data = {
@@ -87,11 +73,9 @@ def get_departments(master: dict, departments_page: dict, page: int) -> InlineKe
         for each in departments_page['results']:
             keyboard.add(InlineKeyboardButton(
                 each['repr'],
-                callback_data=cb.generic.new(
-                    data=each['id'], **cb_edit_data
-                )))
-
+                callback_data=cb.generic.new(data=each['id'], **cb_edit_data)
+            )
+            )
     if page_row:
         keyboard.row(*page_row)
-
     return keyboard

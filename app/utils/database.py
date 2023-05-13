@@ -1,8 +1,5 @@
-import logging
 from requests import Session
-from requests.models import Response
-from requests.exceptions import ConnectionError
-# from app.constants import *
+
 from app.data import constants
 
 
@@ -32,19 +29,6 @@ class Database:
             constants.INVENTORY: self.INVENTORY
         }
         self._permissions = {}
-
-    # def get_permissions(self, id: int) -> dict:
-    #     """ 
-    #     Usage: db.permissions[permission_id]
-    #     Example: 
-
-    #     >>> db.permissions[1]
-    #     {'id': 1, 'repr': 'смотреть Пользователи', 'action': 10, 'subject': 20}
-    #     """
-    #     if not self._permissions:
-    #         self._permissions = {
-    #             i['id']: i for i in self.get(self.PERMISSIONS)}
-    #     return self._permissions[id]
 
     def get(self, subject: str, id: int = '') -> dict | list[dict]:
         """
@@ -104,7 +88,6 @@ class Database:
 
         >>> db.edit_patch(db.PROFILES, id, **data)
         """
-        # response = self.session.put(f'{self.URL}/{table}/{id}/', data=data)
         response = self.session.patch(
             f'{self.URL}/{subject}/{id}/', data=data)
         response = response.json()

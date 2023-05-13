@@ -1,3 +1,7 @@
+from json import dumps
+
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 from app.data import callbacks as cb
 from app.data.constants import *
 from app.data.constants import ADD, CATEGORIES, DELETE, EDIT, VIEW
@@ -7,28 +11,17 @@ from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-
-from copy import deepcopy
-from json import dumps
-
-
 def edit_category(master, category):
     keyboard = get_back(CATEGORIES)
     permissions = tools.permissions(master)
-
     cb_data = {'category_id': category['id']}
-
     if EDIT in permissions[CATEGORIES]:
         keyboard.add(InlineKeyboardButton(
             'Изменить название',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Category.Edit.NAME,
-                data=dumps(
-                    [cb_data['category_id']],
-                )
+                data=dumps([cb_data['category_id']],)
             )
         ))
     if DELETE in permissions[PROFILES]:
@@ -41,15 +34,9 @@ def edit_category(master, category):
     return keyboard
 
 
-
 def get_categories(master: dict, categories_page: dict, page: int) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup()
     permissions = tools.permissions(master)
-
-    cb_data = {
-        'state': Generic.CALLBACK_TO_MESSAGE_INIT,
-    }
-
     page_row = _get_pages(
         categories_page,
         cb.menu_item,
@@ -59,7 +46,6 @@ def get_categories(master: dict, categories_page: dict, page: int) -> InlineKeyb
             page=page))
     keyboard.add(InlineKeyboardButton(
         'В меню', callback_data=cb.action.new(action=Menu.INIT)))
-
     if ADD in permissions[CATEGORIES]:
         cb_add_data = {
             'state': Generic.CALLBACK_TO_MESSAGE_INIT,
@@ -75,11 +61,7 @@ def get_categories(master: dict, categories_page: dict, page: int) -> InlineKeyb
         for each in categories_page['results']:
             keyboard.add(InlineKeyboardButton(
                 each['repr'],
-                callback_data=cb.generic.new(
-                    data=each['id'], **cb_edit_data
-                )))
-
+                callback_data=cb.generic.new(data=each['id'], **cb_edit_data)))
     if page_row:
         keyboard.row(*page_row)
-
     return keyboard
