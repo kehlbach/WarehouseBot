@@ -1,9 +1,11 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+
 class Create(StatesGroup):
-    NAME= 'RC1'
+    NAME = 'RC1'
 
     name = State()
+
     class Permissions:
         MENU = 'RCP1'
         SUBJECT = 'RCP5'
@@ -12,11 +14,13 @@ class Create(StatesGroup):
         SPECIFIC = 'RCP4'
         BACK = 'RCP6'
 
+
 class Edit(StatesGroup):
     MENU = 'RE1'
     NAME = 'RE2'
     SPECIFIC = 'RE4'
     DELETE = 'RE5'
+
     class Permissions:
         MENU = 'REP1'
         SUBJECT = 'REP5'

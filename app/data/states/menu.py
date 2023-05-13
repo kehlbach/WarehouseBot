@@ -3,8 +3,10 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 CURRENT_PAGE = 'CP1'
+
+
 class Menu:
-    INIT = 'M1'  # (StatesGroup):
+    INIT = 'M1'
     PROFILES = 'M2'
     ROLES = 'M3'
     INVENTORY = 'M4'
@@ -12,4 +14,4 @@ class Menu:
     PRODUCTS = 'M6'
     CATEGORIES = 'M7'
     DEPARTMENTS = 'M8'
-    CHOICE= 'M9'
+    CHOICE = 'M9'

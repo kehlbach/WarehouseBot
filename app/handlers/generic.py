@@ -1,28 +1,19 @@
-from json import loads, dumps
-import re
-from copy import copy
-from math import ceil
-from types import SimpleNamespace
+from json import loads
 
-import phonenumbers
-from aiogram import __main__ as aiogram_core
-from aiogram import filters, md, types
+from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.webhook import SendMessage
 from aiogram.types import CallbackQuery
-from phonenumbers.phonenumberutil import NumberParseException
-from aiogram.types import ReplyKeyboardRemove
 
-
-from app.data.constants import PROFILES, CATEGORIES, ROLES, DEPARTMENTS, ALL_DEPARTMENTS, PRODUCTS
 from app.data import callbacks as cb
+from app.data.constants import (CATEGORIES, DEPARTMENTS, PRODUCTS, PROFILES,
+                                ROLES)
+from app.data.states import Category, Department, Generic, Product, Role, User
 from app.keyboards import get_back, kb_skip
+from app.keyboards.department import edit_department_location
+from app.keyboards.product import get_product_categories, kb_get_units
 from app.keyboards.role import get_role_permissions
 from app.keyboards.user import get_user_roles
-from app.keyboards.department import edit_department_location
-from app.keyboards.product import kb_get_units, get_product_categories
-from app.loader import bot, db, dp
-from app.data.states import Generic ,User, Category, Department, Role, Product
+from app.loader import db, dp
 from app.utils.processors import *
 
 
@@ -58,13 +49,11 @@ async def generic_message_request(callback_query: CallbackQuery, callback_data: 
         Product.Create.UNIT: kb_get_units,
         Product.Edit.UNIT: kb_get_units,
     }
-    # to write to state_data from data in order:
-    # data: [] first elem will become:
-    # state_data[profile_id] = data[0] etc
+
     get_data_names = {
         User.Edit.NAME: ['profile_id'],
-        User.Edit.NUMBER: ['profile_id','source_number'],
-        User.Edit.NUMBER_OWN:['profile_id','source_number'],
+        User.Edit.NUMBER: ['profile_id', 'source_number'],
+        User.Edit.NUMBER_OWN: ['profile_id', 'source_number'],
         Category.Edit.NAME: ['category_id'],
         Department.Edit.NAME: ['department_id'],
         Department.Edit.LOCATION: ['department_id'],
@@ -80,31 +69,28 @@ async def generic_message_request(callback_query: CallbackQuery, callback_data: 
         data['state'] = callback_data['state']
         data['action'] = callback_data['action']
         callback_iter = iter(callback_data['data'])
-        for each in get_data_names.get(action,[]):
+        for each in get_data_names.get(action, []):
             data[each] = next(callback_iter)
         return await callback_query.message.answer(
             text=get_text[action],
             reply_markup=reply_markup
         )
 
-# TODO: add these:
-# Product.Create.VENDOR_CODE
-# Product.Create.NAME
-# Product.Create.UNIT
+
 @dp.message_handler(state=Generic.message_handle)
 async def generic_message_handler(message: types.Message, state: FSMContext):
     data = await state.get_data()
     action = data['action']
     processed_data: str = ''
     db_response: dict = {}
-    
+
     get_data_processor = {
         User.Edit.NAME: lambda: name_validator(message.text),
         User.Edit.NUMBER: lambda: number_preprocessor(message, data['source_number']),
         User.Create.NUMBER: lambda: number_preprocessor(message),
         User.Edit.NUMBER_OWN: lambda: number_preprocessor(message, data['source_number']),
         Department.Edit.LOCATION: lambda: ('', True, '') if message.text == 'Убрать адрес' else (message.text, True, '')
-        
+
     }
     get_db_condition = {
         Department.Create.LOCATION: lambda: False if processed_data == 'Пропустить' else True,
@@ -122,10 +108,10 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
             user_id=processed_data),
         User.Create.NUMBER: lambda: db.add(
             db.PROFILES,
-            phone_number = processed_data,
-            role = db.filter(db.ROLES,name='Без прав')['id'],
-            user_id = processed_data
-            ),
+            phone_number=processed_data,
+            role=db.filter(db.ROLES, name='Без прав')['id'],
+            user_id=processed_data
+        ),
         User.Edit.NUMBER_OWN: lambda: db.edit_patch(
             db.PROFILES,
             data['profile_id'],
@@ -140,14 +126,14 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
             data['category_id'],
             name=processed_data
         ),
-        Department.Create.NAME: lambda :db.add(
+        Department.Create.NAME: lambda: db.add(
             db.DEPARTMENTS,
             name=processed_data
         ),
         Department.Create.LOCATION: lambda: db.edit_patch(
             db.DEPARTMENTS,
             data['department']['id'],
-            location = processed_data
+            location=processed_data
         ),
         Department.Edit.NAME: lambda: db.edit_patch(
             db.DEPARTMENTS,
@@ -157,7 +143,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Department.Edit.LOCATION: lambda: db.edit_patch(
             db.DEPARTMENTS,
             data['department_id'],
-            location = processed_data
+            location=processed_data
         ),
         Role.Create.NAME: lambda: db.add(
             db.ROLES,
@@ -171,14 +157,14 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Create.NAME: lambda: db.add(
             db.PRODUCTS,
             name=processed_data,
-            vendor_code = data['vendor_code'],
-            category = ''
+            vendor_code=data['vendor_code'],
+            category=''
         ),
 
         Product.Create.UNIT: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
-            units = processed_data
+            units=processed_data
         ),
         Product.Edit.NAME: lambda: db.edit_patch(
             db.PRODUCTS,
@@ -188,15 +174,15 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Edit.VENDOR_CODE: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
-            vendor_code = processed_data
+            vendor_code=processed_data
         ),
         Product.Edit.UNIT: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
-            units = processed_data
+            units=processed_data
         )
     }
-    
+
     get_next_action = {
         Product.Create.VENDOR_CODE: Product.Create.NAME,
         Product.Create.NAME: Product.Create.UNIT,
@@ -210,17 +196,16 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Create.NAME: lambda: Generic.message_handle.set(),
     }
     set_state_data = {
-        Department.Create.NAME: lambda: state.set_data({'department':db_response,**data}),
-        Product.Create.VENDOR_CODE: lambda: state.set_data({'vendor_code':processed_data ,**data}),
-        Product.Create.NAME: lambda: state.set_data({'product_id':db_response['id'],**data}),
+        Department.Create.NAME: lambda: state.set_data({'department': db_response, **data}),
+        Product.Create.VENDOR_CODE: lambda: state.set_data({'vendor_code': processed_data, **data}),
+        Product.Create.NAME: lambda: state.set_data({'product_id': db_response['id'], **data}),
     }
-
 
     get_text = {
         User.Edit.NAME: lambda: 'Имя пользователя изменено на {}.'.format(db_response['name']),
         User.Create.NUMBER: lambda: 'Выберите роль пользователя:',
-        User.Edit.NUMBER: lambda : 'Номер изменен на {}.'.format(db_response['phone_number']),
-        User.Edit.NUMBER_OWN: lambda : 'Номер изменен на {}.'.format(db_response['phone_number']) +
+        User.Edit.NUMBER: lambda: 'Номер изменен на {}.'.format(db_response['phone_number']),
+        User.Edit.NUMBER_OWN: lambda: 'Номер изменен на {}.'.format(db_response['phone_number']) +
         '\nТеперь вы можете войти с другого аккаунта Telegram.',
         Category.Create.NAME: lambda: 'Категория "{}" создана.'.format(db_response['name']),
         Category.Edit.NAME: lambda: 'Название категории изменено на "{}".'.format(db_response['name']),
@@ -238,34 +223,36 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Edit.UNIT: lambda: 'Единицы измерения товара изменены на "{}".'.format(db_response['units']),
     }
     get_reply_markup = {
-        User.Edit.NAME: lambda:get_back(PROFILES,data['profile_id']),
-        User.Edit.NUMBER: lambda:get_back(PROFILES, data['profile_id']),
-        User.Create.NUMBER: lambda: get_user_roles(User.Create.Roles,
-                                                1,
-                                                db_response['id'],
-                                                db.get_page(db.ROLES)),
-        User.Edit.NUMBER_OWN: lambda:get_back(PROFILES,data['profile_id']),
-        Category.Create.NAME: lambda:get_back(CATEGORIES,db_response['id']),
-        Category.Edit.NAME: lambda:get_back(CATEGORIES,data['category_id']),
+        User.Edit.NAME: lambda: get_back(PROFILES, data['profile_id']),
+        User.Edit.NUMBER: lambda: get_back(PROFILES, data['profile_id']),
+        User.Create.NUMBER: lambda: get_user_roles(
+            User.Create.Roles,
+            1,
+            db_response['id'],
+            db.get_page(db.ROLES)),
+        User.Edit.NUMBER_OWN: lambda: get_back(PROFILES, data['profile_id']),
+        Category.Create.NAME: lambda: get_back(CATEGORIES, db_response['id']),
+        Category.Edit.NAME: lambda: get_back(CATEGORIES, data['category_id']),
         Department.Create.NAME: lambda: kb_skip,
-        Department.Create.LOCATION: lambda:get_back(DEPARTMENTS,data['department']['id']),
-        Department.Edit.NAME: lambda:get_back(DEPARTMENTS,data['department_id']),
-        Department.Edit.LOCATION: lambda:get_back(DEPARTMENTS,data['department_id']),
-        Role.Create.NAME: lambda:get_role_permissions(Role.Create.Permissions,db_response),
-        Role.Edit.NAME: lambda:get_back(ROLES,data['role_id']),
-        Product.Create.UNIT: lambda: get_product_categories(Product.Create.Category,
-                                                            1,
-                                                            db_response['id'],
-                                                            db.get_page(db.CATEGORIES)),
+        Department.Create.LOCATION: lambda: get_back(DEPARTMENTS, data['department']['id']),
+        Department.Edit.NAME: lambda: get_back(DEPARTMENTS, data['department_id']),
+        Department.Edit.LOCATION: lambda: get_back(DEPARTMENTS, data['department_id']),
+        Role.Create.NAME: lambda: get_role_permissions(Role.Create.Permissions, db_response),
+        Role.Edit.NAME: lambda: get_back(ROLES, data['role_id']),
+        Product.Create.UNIT: lambda: get_product_categories(
+            Product.Create.Category,
+            1,
+            db_response['id'],
+            db.get_page(db.CATEGORIES)),
         Product.Create.NAME: lambda: kb_get_units,
-        Product.Edit.NAME: lambda:get_back(PRODUCTS,data['product_id']),
-        Product.Edit.VENDOR_CODE: lambda:get_back(PRODUCTS,data['product_id']),
-        Product.Edit.UNIT: lambda:get_back(PRODUCTS,data['product_id']),
+        Product.Edit.NAME: lambda: get_back(PRODUCTS, data['product_id']),
+        Product.Edit.VENDOR_CODE: lambda: get_back(PRODUCTS, data['product_id']),
+        Product.Edit.UNIT: lambda: get_back(PRODUCTS, data['product_id']),
     }
 
-    process_input = get_data_processor.get(action, lambda : (message.text, True, ''))
+    process_input = get_data_processor.get(action, lambda: (message.text, True, ''))
     processed_data, is_valid, error_text = process_input()
-    
+
     if not is_valid:
         return await message.answer(error_text)
     db_condition = get_db_condition.get(action, lambda: True)
@@ -278,13 +265,8 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
     await set_state.get(action, state.finish)()
     if action in set_state_data.keys():
         await set_state_data[action]()
-    reply_markup = get_reply_markup.get(action, lambda:None)()
+    reply_markup = get_reply_markup.get(action, lambda: None)()
     if reply_markup:
-        return await message.answer(
-            text=get_text[action](),
-            reply_markup=reply_markup,
-)
+        return await message.answer(text=get_text[action](), reply_markup=reply_markup,)
     else:
-        return await message.answer(
-            text=get_text[action](),
-        )
+        return await message.answer(text=get_text[action](),)

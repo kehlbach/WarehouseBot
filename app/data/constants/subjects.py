@@ -7,11 +7,11 @@ CATEGORIES = 25
 DEPARTMENTS = 26
 ALL_DEPARTMENTS = 27
 ALL_SUBJECTS = dict((
-        (PROFILES, 'Пользователи'),
-        (ROLES, 'Роли'),
-        (INVENTORY, 'Остатки'),
-        (RECEIPTS, 'Накладные'),
-        (PRODUCTS, 'Номенклатура'),
-        (CATEGORIES, 'Категории'),
-        (DEPARTMENTS, 'Отделения')
-    ))
+    (PROFILES, 'Пользователи'),
+    (ROLES, 'Роли'),
+    (INVENTORY, 'Остатки'),
+    (RECEIPTS, 'Накладные'),
+    (PRODUCTS, 'Номенклатура'),
+    (CATEGORIES, 'Категории'),
+    (DEPARTMENTS, 'Отделения')
+))

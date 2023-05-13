@@ -15,12 +15,10 @@ generic = CallbackData('post', 'state', 'action', 'data', sep='|')
 menu_item = CallbackData('post', 'state', 'action', 'page', sep='|')
 """ >>> ('state', 'action', 'page')"""
 
-# edit_user = CallbackData('state', 'action', 'profile_id', 'source_number')
-
 user_role = CallbackData(
     'post',
-    'state', 
-    'action', 
+    'state',
+    'action',
     'page',
     'profile_id',
     'role_id')
@@ -28,19 +26,18 @@ user_role = CallbackData(
 
 product_category = CallbackData(
     'post',
-    'state', 
-    'action', 
+    'state',
+    'action',
     'page',
     'product_id',
     'category_id')
 """>>> ('state', 'action', 'page', 'product_id', 'category_id')"""
 
 
-
 user_departments = CallbackData(
     'post',
-    'state', 
-    'action', 
+    'state',
+    'action',
     'page',
     'profile_id',
     'department_id',

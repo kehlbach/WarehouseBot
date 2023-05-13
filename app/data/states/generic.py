@@ -3,6 +3,7 @@
 
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+
 class Generic(StatesGroup):
     CALLBACK_TO_MESSAGE_INIT = 'G1'
     """generic handler catches and sends message"""
