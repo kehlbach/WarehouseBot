@@ -83,7 +83,7 @@ async def create_receipt_type(callback_query: CallbackQuery, callback_data: dict
         return await callback_query.answer('Нельзя создать накладную если нет доступных отделений')
     page = callback_data.get('page', 1)
     text = 'Выберите тип накладной'
-    reply_markup = kb.receipt.kb_get_types()
+    reply_markup = kb.kb_get_types()
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
