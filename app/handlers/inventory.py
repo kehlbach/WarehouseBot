@@ -34,7 +34,7 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
     if data:
         table = tabulate(rows, headers=headers)
         font_size = 20
-        font = ImageFont.truetype("arial.ttf", font_size)
+        font = ImageFont.load_default()
         cell_padding = 5  # Add some padding around the text in each cell
         line_height = font.getsize("hg")[1] + cell_padding * 2  # Height of each row
         header_height = font.getsize(max(headers, key=len))[1] + cell_padding * 2  # Height of header row
