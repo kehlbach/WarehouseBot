@@ -53,3 +53,13 @@ role_permissions = CallbackData(
     'action_id'
 )
 """>>> ('state', 'action', 'role_id', 'subject_id', 'action_id')"""
+
+receipt_department = CallbackData(
+    'post',
+    'state',
+    'action',
+    'receipt_id',
+    'department_id',
+    'page'
+)
+""" >>> ('state', 'action', 'receipt_id', 'department_id', 'page')"""

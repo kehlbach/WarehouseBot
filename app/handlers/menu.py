@@ -45,7 +45,9 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
         case Menu.INVENTORY:
             pass
         case Menu.RECEIPTS:
-            pass
+            departments_page = db.get_page(db.DEPARTMENTS,callback_data.get('page',1))
+            text = 'Выберите отделение для просмотра накладных'
+            reply_markup = get_receipt_department(master, departments_page, callback_data.get('page',1))
         case Menu.PRODUCTS:
             products_page = db.get_page(db.PRODUCTS,callback_data.get('page',1))
             text = 'Выберите товар'

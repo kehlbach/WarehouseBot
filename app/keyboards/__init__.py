@@ -6,3 +6,4 @@ from .menu import *
 from .product import *
 from .role import *
 from .user import *
+from .receipt import *

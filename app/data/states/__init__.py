@@ -13,6 +13,7 @@ from . import category as Category
 from . import role as Role
 from . import department as Department
 from . import product as Product
+from . import receipt as Receipt
 from .generic import *
 from .login import *
 from .menu import *
