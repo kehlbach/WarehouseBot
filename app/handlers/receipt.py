@@ -22,14 +22,14 @@ async def work_on_receipts(callback_query: CallbackQuery, callback_data: dict, s
                                     allowed_to=master['id'])
         dep = db.get(db.DEPARTMENTS, callback_data['data'])
         text = 'Отделение: {}\nВыберите накладную'.format(dep['repr'])
-        reply_markup = kb.receipt.get_receipts(master, receipts_page, callback_data.get('page', 1),
+        reply_markup = kb.get_receipts(master, receipts_page, callback_data.get('page', 1),
                                     department=callback_data['data'])
     else:  # All available departments
         receipts_page = db.get_page(db.RECEIPTS,
                                     callback_data.get('page', 1),
                                     allowed_to=master['id'])
         text = 'Накладные по всем отделениям\nВыберите накладную'
-        reply_markup = kb.receipt.get_receipts(master, receipts_page, callback_data.get('page', 1),
+        reply_markup = kb.get_receipts(master, receipts_page, callback_data.get('page', 1),
                                     department=callback_data['data'])
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,
@@ -62,7 +62,7 @@ async def edit_receipt(callback_query: CallbackQuery, callback_data: dict, state
         text += '\nТовары:'
         for each in products:
             text += f'\n    {each["product_name"]}: {each["quantity"]} {each["product_units"]}'
-        reply_markup = kb.receipt.kb_edit_receipt(master, receipt=receipt, department=department_id)
+        reply_markup = kb.kb_edit_receipt(master, receipt=receipt, department=department_id)
     else:
         text = 'Нет доступа'
         reply_markup = None
