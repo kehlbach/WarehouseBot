@@ -100,7 +100,7 @@ async def create_receipt_type(callback_query: CallbackQuery, callback_data: dict
     master = db.filter(db.PROFILES, user_id=user_id)
     receipt = db.add(db.RECEIPTS,made_by=master['id'])
     departments_page = db.get_page(db.DEPARTMENTS, page, allowed_to=master['id'])
-    reply_markup = kb.receipt.kb_get_create_department(master, departments_page, action, page, receipt_id=receipt['id'])
+    reply_markup = kb.kb_get_create_department(master, departments_page, action, page, receipt_id=receipt['id'])
     match action:
         case Receipt.Create.FROM_DEP:
             text = 'Выберите отделение, из которого поступают товары по накладной'
@@ -137,15 +137,15 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             if receipt['from_department']:
                 dep_id = receipt['from_department']
                 remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-                reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1, remainings)
+                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
             else:
-                reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1)
+                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
         case Receipt.Create.FROM_DEP:
             text = 'Приходная накладная\nВыберите отделение, в которое поступают товары по накладной'
             changed_receipt = db.edit_patch(db.RECEIPTS, receipt_id,
                                             from_department=department_id)
             departments_page = db.get_page(db.DEPARTMENTS, 1, allowed_to=master['id'])
-            reply_markup = kb.receipt.kb_get_create_department(
+            reply_markup = kb.kb_get_create_department(
                 master, departments_page, Receipt.Create.TO_DEP, 1, receipt_id=receipt_id)
         case Receipt.Create.FROM_DEP_ONLY:
             text = 'Выберите товар для добавления в накладную'
@@ -155,9 +155,9 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             if changed_receipt['from_department']:
                 dep_id = changed_receipt['from_department']
                 remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-                reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1, remainings)
+                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
             else:
-                reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1)
+                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
         case Receipt.Create.TO_DEP:
             text = 'Выберите товар для добавления в накладную'
             receipt = db.get(db.RECEIPTS, receipt_id)
@@ -169,9 +169,9 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             if changed_receipt['from_department']:
                 dep_id = changed_receipt['from_department']
                 remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-                reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1, remainings)
+                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
             else:
-                reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1)
+                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
 
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
@@ -274,9 +274,9 @@ async def create_product_quantity(message: Message, state: FSMContext):
         if receipt['from_department']:
             dep_id = receipt['from_department']
             remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-            reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1, remainings)
+            reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
         else:
-            reply_markup = kb.receipt.kb_add_product(master, products_page, receipt_id, 1)
+            reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
         return await message.answer(text=text, reply_markup=reply_markup)
     else:
         return await message.answer('Введите число\n Если товар выбран ошибочно, укажите 0')
@@ -291,7 +291,7 @@ async def create_note(message: Message, state: FSMContext):
     receipt = db.get(db.RECEIPTS, id=receipt_id)
     department = receipt['to_department'] if receipt['to_department'] else receipt['from_department']
     text = 'Накладная была создана'
-    reply_markup = kb.receipt.kb_back_to_receipts(master, receipt_id, department)
+    reply_markup = kb.kb_back_to_receipts(master, receipt_id, department)
     if message.text != 'Пропустить':
         db.edit_patch(db.RECEIPTS, receipt_id, note=message.text)
     return await message.answer(text=text, reply_markup=reply_markup)
