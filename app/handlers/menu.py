@@ -10,7 +10,7 @@ from app.keyboards import *
 from app.keyboards.category import get_categories
 from app.loader import bot, db, dp
 from app.utils import tools
-
+from aiogram.utils.exceptions import BadRequest
 from .login import _prepare_menu
 
 
@@ -43,7 +43,9 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
             text = 'Выберите роль'
             reply_markup = kb.get_roles(master,roles_page, callback_data.get('page',1))
         case Menu.INVENTORY:
-            pass
+            departments_page = db.get_page(db.DEPARTMENTS,callback_data.get('page',1))
+            text = 'Выберите отделение для просмотра остатков'
+            reply_markup = get_inventory_department(master, departments_page, callback_data.get('page',1))
         case Menu.RECEIPTS:
             departments_page = db.get_page(db.DEPARTMENTS,callback_data.get('page',1))
             text = 'Выберите отделение для просмотра накладных'
@@ -61,12 +63,21 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
             text = 'Выберите отделение'
             reply_markup = kb.get_departments(master,departments_page, callback_data.get('page',1))
 
-
-    return await bot.edit_message_text(
-        chat_id=callback_query.message.chat.id,
-        message_id=callback_query.message.message_id,
-        text= text,
-        reply_markup=reply_markup)
+    try:
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text= text,
+            reply_markup=reply_markup)
+    except BadRequest:
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id, 
+            message_id=callback_query.message.message_id)
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            text=text,
+            reply_markup=reply_markup
+        )
 
 
 

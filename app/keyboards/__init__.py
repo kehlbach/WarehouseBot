@@ -7,3 +7,4 @@ from .product import *
 from .role import *
 from .user import *
 from .receipt import *
+from .inventory import *

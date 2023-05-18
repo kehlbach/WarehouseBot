@@ -10,3 +10,4 @@ from . import department
 from . import role
 from . import product
 from . import receipt
+from . import inventory

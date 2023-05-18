@@ -17,6 +17,7 @@ class Database:
         self.RECEIPTS = 'receipts'
         self.RECEIPT_PRODUCTS = 'receipt_products'
         self.INVENTORY = 'inventory'
+        self.INVENTORY_SUMMARY = 'latest_inventory'
         self.SUBJECTS = 'subjects'
         self.ACTIONS = 'actions'
         self.SUBJECT = {
@@ -64,7 +65,10 @@ class Database:
         >>> data = {'name':..}; db.add(subject=db.PROFILES, **data)
         >>> db.add(subject=db.PROFILES,name='..',..)"""
         response = self.session.post(f'{self.URL}/{_subject}/', data=data)
-        response = response.json()
+        try:
+            response = response.json()
+        except:
+            pass
         return response
 
     def edit_put(self, subject, object, **data) -> dict:
@@ -98,7 +102,7 @@ class Database:
         response = response
         return response
 
-    def filter(self, _subject, **conditions) -> list[dict] | dict:
+    def filter(self, _subject, return_list = False, **conditions) -> list[dict] | dict:
         """usage:
         >>> db.filter('profiles',phone_number='+77479309084')"""
         url = f'{self.URL}/{_subject}/?'
@@ -109,7 +113,7 @@ class Database:
         if 'Select a valid choice' in str(response.json()):
             return []
         result = response.json()['results']
-        if len(result) == 1:
+        if len(result) == 1 and not return_list:
             return response.json()['results'][0]
         else:
             return response.json()['results']

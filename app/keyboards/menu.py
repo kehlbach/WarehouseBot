@@ -31,7 +31,10 @@ def get_back(subject='', subject_id=''):
             subject_text = 'К роли'
             subject_action = Role.Edit.MENU
         case subjects.INVENTORY:
-            pass
+            to_first_menu_text = 'К выбору отделения'
+            to_first_menu_action = Menu.INVENTORY
+            #subject_text = ['К списку накладных']
+            #subject_action = [Inventory.View.DEPARTMENT]
         case subjects.RECEIPTS:
             pass
         case subjects.PRODUCTS:
