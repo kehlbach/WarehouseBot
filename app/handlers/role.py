@@ -138,7 +138,7 @@ async def handle_role_delete(callback_query: CallbackQuery, callback_data: dict,
     if response.status_code == 204:
         text = 'Роль успешно удалена.'
     elif 'ProtectedError' in response.text:
-        reply_markup = get_back(ROLES, subject_id=role_id)
+        reply_markup = get_back(ROLES, data=role_id)
         text = 'Нельзя удалить роль, для которой заданы пользователи.'
     else:
         text = 'Произошла ошибка при удалении роли.'
