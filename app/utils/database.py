@@ -118,8 +118,14 @@ class Database:
         else:
             return response.json()['results']
 
-    def get_page(self, subject, page='1'):
+    def get_page(self, subject, page='1', **arg):
+        """usage:
+        >>> db.get_page(db.PROFILES, page=2)
+        >>> db.get_page(db.RECEIPTS, page=2, department=1)
+        """
         url = f'{self.URL}/{subject}/?page={page}'
+        for key, value in arg.items():
+            url += f'&{key}={value}'
         response = self.session.get(url).json()
         return response
 
