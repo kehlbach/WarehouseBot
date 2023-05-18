@@ -14,7 +14,7 @@ from tabulate import tabulate
 from PIL import Image, ImageDraw, ImageFont
 import io
 from aiogram.types import InputFile
-
+import platform
 
 @dp.callback_query_handler(cb.generic.filter(state=Inventory.View.DEPARTMENT), state='*')
 async def view_by_department(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
@@ -34,7 +34,10 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
     if data:
         table = tabulate(rows, headers=headers)
         font_size = 20
-        font = ImageFont.load_default()
+        if platform.system() == "Windows":
+            font = ImageFont.truetype("arial.ttf", font_size)
+        elif platform.system() == "Linux":
+            font = ImageFont.truetype("DejaVuSans.ttf", font_size)
         cell_padding = 5  # Add some padding around the text in each cell
         line_height = font.getsize("hg")[1] + cell_padding * 2  # Height of each row
         header_height = font.getsize(max(headers, key=len))[1] + cell_padding * 2  # Height of header row
