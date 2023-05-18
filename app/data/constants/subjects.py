@@ -11,7 +11,7 @@ ALL_SUBJECTS = dict((
     (ROLES, 'Роли'),
     (INVENTORY, 'Остатки'),
     (RECEIPTS, 'Накладные'),
-    (PRODUCTS, 'Номенклатура'),
+    (PRODUCTS, 'Товары'),
     (CATEGORIES, 'Категории'),
     (DEPARTMENTS, 'Отделения')
 ))
