@@ -12,7 +12,7 @@ kb_check_status = InlineKeyboardMarkup()
 kb_check_status.add(InlineKeyboardButton('Проверить статус', callback_data=cb.action.new(action=Login.CHECK)))
 
 
-def get_back(subject='', subject_id=''):
+def get_back(subject='', data=''):
     """if user_id provided then back to user available
     Buttons:
         - В меню
@@ -21,13 +21,13 @@ def get_back(subject='', subject_id=''):
     """
     match subject:
         case subjects.PROFILES:
-            subjects_text = 'К списку пользователей'
-            subjects_action = Menu.PROFILES
+            to_first_menu_text = 'К списку пользователей'
+            to_first_menu_action = Menu.PROFILES
             subject_text = 'К пользователю'
             subject_action = User.Edit.MENU
         case subjects.ROLES:
-            subjects_text = 'К списку ролей'
-            subjects_action = Menu.ROLES
+            to_first_menu_text = 'К списку ролей'
+            to_first_menu_action = Menu.ROLES
             subject_text = 'К роли'
             subject_action = Role.Edit.MENU
         case subjects.INVENTORY:
@@ -36,20 +36,25 @@ def get_back(subject='', subject_id=''):
             #subject_text = ['К списку накладных']
             #subject_action = [Inventory.View.DEPARTMENT]
         case subjects.RECEIPTS:
-            pass
+            to_first_menu_text = 'К выбору отделения'
+            to_first_menu_action = Menu.RECEIPTS
+            subject_text = ['К списку накладных',
+                            'К накладной']
+            subject_action = [Receipt.Edit.DEPARTMENT,
+                              Receipt.Edit.MENU]
         case subjects.PRODUCTS:
-            subjects_text = 'К списку товаров'
-            subjects_action = Menu.PRODUCTS
+            to_first_menu_text = 'К списку товаров'
+            to_first_menu_action = Menu.PRODUCTS
             subject_text = 'К товару'
             subject_action = Product.Edit.MENU
         case subjects.CATEGORIES:
-            subjects_text = 'К списку категорий'
-            subjects_action = Menu.CATEGORIES
+            to_first_menu_text = 'К списку категорий'
+            to_first_menu_action = Menu.CATEGORIES
             subject_text = 'К категории'
             subject_action = Category.Edit.MENU
         case subjects.DEPARTMENTS:
-            subjects_text = 'К списку отделений'
-            subjects_action = Menu.DEPARTMENTS
+            to_first_menu_text = 'К списку отделений'
+            to_first_menu_action = Menu.DEPARTMENTS
             subject_text = 'К отделению'
             subject_action = Department.Edit.MENU
 
@@ -59,18 +64,27 @@ def get_back(subject='', subject_id=''):
         'В меню', callback_data=cb.action.new(action=Menu.INIT)))
     if subject:
         keyboard.add(InlineKeyboardButton(
-            subjects_text,
+            to_first_menu_text,
             callback_data=cb.menu_item.new(
                 state=Menu.CHOICE,
-                action=subjects_action,
+                action=to_first_menu_action,
                 page=1)))
-        if subject_id:
-            keyboard.add(InlineKeyboardButton(
-                subject_text,
-                callback_data=cb.generic.new(
-                    state=subject_action,
-                    action=subject_action,
-                    data=subject_id)))
+        if data:
+            if type(data) == list:
+                for each in range(len(data)):
+                    keyboard.add(InlineKeyboardButton(
+                        subject_text[each],
+                        callback_data=cb.generic.new(
+                            state=subject_action[each],
+                            action=subject_action[each],
+                            data=data[each])))
+            else:
+                keyboard.add(InlineKeyboardButton(
+                    subject_text,
+                    callback_data=cb.generic.new(
+                        state=subject_action,
+                        action=subject_action,
+                        data=data)))
     return keyboard
 
 
