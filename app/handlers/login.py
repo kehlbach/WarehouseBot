@@ -113,7 +113,10 @@ async def check_status(callback_query: types.CallbackQuery, state: FSMContext):
 async def general_error_handler(update, exception):
     match exception:
         case requests.exceptions.ConnectionError() | urllib3.exceptions.NewConnectionError():
-            chat_id = update.message.from_id
+            if 'callback_query' in update:
+                chat_id = update.callback_query.message.chat.id
+            elif 'message' in update:
+                chat_id = update.message.chat.id
             logging.error(f'⭕ Нет подключения к базе данных')
             return await bot.send_message(chat_id, 'Нет соединения с базой данных')
         case exceptions.MessageNotModified:
