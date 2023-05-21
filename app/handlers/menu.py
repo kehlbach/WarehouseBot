@@ -19,12 +19,20 @@ from .login import _prepare_menu
 async def process_menu_init(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     user_id = callback_query['from']['id']
     master = db.filter(db.PROFILES, user_id=user_id)
-    await bot.edit_message_text(
-        chat_id=callback_query.message.chat.id,
-        message_id=callback_query.message.message_id,
-        **_prepare_menu(master)
-    )
-    
+    try:
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            **_prepare_menu(master)
+        )
+    except BadRequest:
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id, 
+            message_id=callback_query.message.message_id)
+        await bot.send_message(
+            chat_id=callback_query.message.chat.id,
+            **_prepare_menu(master)
+        )
 
 
 
