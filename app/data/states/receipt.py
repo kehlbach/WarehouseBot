@@ -1,23 +1,23 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 class Create(StatesGroup):
-    INIT = 'RC0'
-    TYPE = 'RC1'
-    DEPARTMENT = 'RC2'
-    FROM_DEP_ONLY = 'RC3'
-    FROM_DEP = 'RC4'
-    TO_DEP = 'RC5'
-    PRODUCT = 'RC6'
+    INIT = 'REC0'
+    TYPE = 'REC1'
+    DEPARTMENT = 'REC2'
+    FROM_DEP_ONLY = 'REC3'
+    FROM_DEP = 'REC4'
+    TO_DEP = 'REC5'
+    PRODUCT = 'REC6'
     #QUANTITY = 'RC7'
     quantity = State()
     note = State()
-    DONE = 'RC8'
-    PRODUCT_ABORT = 'RC9'
+    DONE = 'REC8'
+    PRODUCT_ABORT = 'REC9'
 
 
 
 class Edit(StatesGroup):
-    DEPARTMENT = 'RD1'
-    MENU = 'RD2'
-    NOTE = 'RD3'
-    DELETE = 'RD4'
+    DEPARTMENT = 'RED1'
+    MENU = 'RED2'
+    NOTE = 'RED3'
+    DELETE = 'RED4'

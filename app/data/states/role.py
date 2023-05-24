@@ -2,29 +2,29 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 class Create(StatesGroup):
-    NAME = 'RC1'
+    NAME = 'ROC1'
 
     name = State()
 
     class Permissions:
-        MENU = 'RCP1'
-        SUBJECT = 'RCP5'
-        DONE = 'RCP2'
-        ALL = 'RCP3'
-        SPECIFIC = 'RCP4'
-        BACK = 'RCP6'
+        MENU = 'ROCP1'
+        SUBJECT = 'ROCP5'
+        DONE = 'ROCP2'
+        ALL = 'ROCP3'
+        SPECIFIC = 'ROCP4'
+        BACK = 'ROCP6'
 
 
 class Edit(StatesGroup):
-    MENU = 'RE1'
-    NAME = 'RE2'
-    SPECIFIC = 'RE4'
-    DELETE = 'RE5'
+    MENU = 'ROE1'
+    NAME = 'ROE2'
+    SPECIFIC = 'ROE4'
+    DELETE = 'ROE5'
 
     class Permissions:
-        MENU = 'REP1'
-        SUBJECT = 'REP5'
-        DONE = 'REP2'
-        ALL = 'REP3'
-        SPECIFIC = 'REP4'
-        BACK = 'REP6'
+        MENU = 'ROEP1'
+        SUBJECT = 'ROEP5'
+        DONE = 'ROEP2'
+        ALL = 'ROEP3'
+        SPECIFIC = 'ROEP4'
+        BACK = 'ROEP6'
