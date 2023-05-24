@@ -40,10 +40,17 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
             all_departments_ids = [i['id'] for i in all_departments]
             departments_page = db.get_page(db.DEPARTMENTS, page)
             if profile['departments'] == all_departments_ids:
-                profile = db.edit_put(db.PROFILES, profile, departments=[])
+                profile = db.edit_put(
+                    db.PROFILES,
+                    profile,
+                    departments=[],
+                    requester=callback_query.message.chat.id)
             else:
                 profile = db.edit_put(
-                    db.PROFILES, profile, departments=all_departments_ids)
+                    db.PROFILES,
+                    profile,
+                    departments=all_departments_ids,
+                    requester=callback_query.message.chat.id)
             reply_markup = get_user_departments(
                 action_class,
                 page=page,
@@ -73,7 +80,10 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
                 profile['departments'].remove(int(callback_data['department_id']))
             else:
                 profile['departments'].append(int(callback_data['department_id']))
-            profile = db.edit_put(db.PROFILES, profile)
+            profile = db.edit_put(
+                db.PROFILES,
+                profile,
+                requester=callback_query.message.chat.id)
             reply_markup = get_user_departments(
                 action_class,
                 page=page,
@@ -126,7 +136,8 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
             created_user = db.edit_patch(
                 db.PROFILES,
                 id=callback_data['profile_id'],
-                role=callback_data['role_id'])
+                role=callback_data['role_id'],
+                requester=callback_query.message.chat.id)
             all_departments = db.get(db.DEPARTMENTS)
             departments_page = db.get_page(db.DEPARTMENTS, page)
             reply_markup = get_user_departments(
@@ -139,7 +150,8 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
             changed_user = db.edit_patch(
                 db.PROFILES,
                 id=callback_data['profile_id'],
-                role=callback_data['role_id'])
+                role=callback_data['role_id'],
+                requester=callback_query.message.chat.id)
             text = 'Роль успешно изменена. Новая роль - {}.'.format(
                 changed_user['role_name'])
             reply_markup = get_back(PROFILES, callback_data['profile_id'])

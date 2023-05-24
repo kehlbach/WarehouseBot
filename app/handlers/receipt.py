@@ -142,15 +142,18 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
                 reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
         case Receipt.Create.FROM_DEP:
             text = 'Приходная накладная\nВыберите отделение, в которое поступают товары по накладной'
-            changed_receipt = db.edit_patch(db.RECEIPTS, receipt_id,
-                                            from_department=department_id)
+            changed_receipt = db.edit_patch(db.RECEIPTS,
+                                            receipt_id,
+                                            from_department=department_id,
+                                            requester=callback_query.message.chat.id)
             departments_page = db.get_page(db.DEPARTMENTS, 1, allowed_to=master['id'])
             reply_markup = kb.kb_get_create_department(
                 master, departments_page, Receipt.Create.TO_DEP, 1, receipt_id=receipt_id)
         case Receipt.Create.FROM_DEP_ONLY:
             text = 'Выберите товар для добавления в накладную'
             changed_receipt = db.edit_patch(db.RECEIPTS, receipt_id,
-                                            from_department=department_id)
+                                            from_department=department_id,
+                                            requester=callback_query.message.chat.id)
             products_page = db.get_page(db.PRODUCTS)
             if changed_receipt['from_department']:
                 dep_id = changed_receipt['from_department']
@@ -164,7 +167,8 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             if int(department_id) == receipt['from_department']:
                 return await callback_query.answer('Исходное и конечное отделения не могут совпадать')
             changed_receipt = db.edit_patch(db.RECEIPTS, receipt_id,
-                                            to_department=department_id)
+                                            to_department=department_id,
+                                            requester=callback_query.message.chat.id)
             products_page = db.get_page(db.PRODUCTS)
             if changed_receipt['from_department']:
                 dep_id = changed_receipt['from_department']
@@ -296,7 +300,10 @@ async def create_note(message: Message, state: FSMContext):
     text = 'Накладная была создана'
     reply_markup = kb.kb_back_to_receipts(master, receipt_id, department)
     if message.text != 'Пропустить':
-        db.edit_patch(db.RECEIPTS, receipt_id, note=message.text)
+        db.edit_patch(
+            db.RECEIPTS,
+            receipt_id, note=message.text,
+            requester=message.chat.id)
     return await message.answer(text=text, reply_markup=reply_markup)
 
 @dp.callback_query_handler(cb.generic.filter(state=Receipt.Edit.DELETE), state='*')

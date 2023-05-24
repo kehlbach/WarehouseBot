@@ -100,10 +100,12 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         User.Edit.NAME: lambda: db.edit_patch(
             db.PROFILES,
             data['profile_id'],
+            requester=message.chat.id,
             name=processed_data),
         User.Edit.NUMBER: lambda: db.edit_patch(
             db.PROFILES,
             data['profile_id'],
+            requester=message.chat.id,
             phone_number=processed_data,
             user_id=processed_data),
         User.Create.NUMBER: lambda: db.add(
@@ -115,6 +117,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         User.Edit.NUMBER_OWN: lambda: db.edit_patch(
             db.PROFILES,
             data['profile_id'],
+            requester=message.chat.id,
             phone_number=processed_data,
             user_id=processed_data),
         Category.Create.NAME: lambda: db.add(
@@ -124,6 +127,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Category.Edit.NAME: lambda: db.edit_patch(
             db.CATEGORIES,
             data['category_id'],
+            requester=message.chat.id,
             name=processed_data
         ),
         Department.Create.NAME: lambda: db.add(
@@ -133,16 +137,19 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Department.Create.LOCATION: lambda: db.edit_patch(
             db.DEPARTMENTS,
             data['department']['id'],
+            requester=message.chat.id,
             location=processed_data
         ),
         Department.Edit.NAME: lambda: db.edit_patch(
             db.DEPARTMENTS,
             data['department_id'],
+            requester=message.chat.id,
             name=processed_data
         ),
         Department.Edit.LOCATION: lambda: db.edit_patch(
             db.DEPARTMENTS,
             data['department_id'],
+            requester=message.chat.id,
             location=processed_data
         ),
         Role.Create.NAME: lambda: db.add(
@@ -152,6 +159,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Role.Edit.NAME: lambda: db.edit_patch(
             db.ROLES,
             data['role_id'],
+            requester=message.chat.id,
             name=processed_data
         ),
         Product.Create.NAME: lambda: db.add(
@@ -164,21 +172,25 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Create.UNIT: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
+            requester=message.chat.id,
             units=processed_data
         ),
         Product.Edit.NAME: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
+            requester=message.chat.id,
             name=processed_data
         ),
         Product.Edit.VENDOR_CODE: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
+            requester=message.chat.id,
             vendor_code=processed_data
         ),
         Product.Edit.UNIT: lambda: db.edit_patch(
             db.PRODUCTS,
             data['product_id'],
+            requester=message.chat.id,
             units=processed_data
         )
     }

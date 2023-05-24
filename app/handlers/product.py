@@ -63,10 +63,16 @@ async def handle_product_edit_category(callback_query: CallbackQuery, callback_d
             text = 'Товар успешно создан'
             reply_markup = get_back(PRODUCTS, callback_data['product_id'])
             db.edit_patch(
-                db.PRODUCTS, id=callback_data['product_id'], category=callback_data['category_id'])
+                db.PRODUCTS,
+                id=callback_data['product_id'],
+                category=callback_data['category_id'],
+                requester=callback_query.message.chat.id)
         case Product.Edit.Category.SPECIFIC:
             changed_product = db.edit_patch(
-                db.PRODUCTS, id=callback_data['product_id'], category=callback_data['category_id'])
+                db.PRODUCTS,
+                id=callback_data['product_id'],
+                category=callback_data['category_id'],
+                requester=callback_query.message.chat.id)
             text = 'Категория успешно изменена на {}'.format(changed_product['category_name'])
             reply_markup = get_back(PRODUCTS, callback_data['product_id'])
 
