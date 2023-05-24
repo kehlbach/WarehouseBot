@@ -31,7 +31,7 @@ class Database:
         }
         self._permissions = {}
 
-    def get(self, subject: str, id: int = '', is_allowed = None, allowed_action=None) -> dict | list[dict]:
+    def get(self, subject: str, id: int = '', is_allowed = None, intended_actions=None) -> dict | list[dict]:
         """
         Get all entities by subject: 
         >>> db.get(db.PROFILES)
@@ -44,8 +44,8 @@ class Database:
             url += f'/{id}'
             if is_allowed:
                 url += f'/?is_allowed={is_allowed}'
-            if allowed_action:
-                url += f'&allowed_action={allowed_action}'
+            if intended_actions:
+                url += f'&intended_actions={intended_actions}'
             response = self.session.get(url)
             if response.status_code == 404:
                 return []
@@ -57,8 +57,8 @@ class Database:
             next = True
             if is_allowed:
                 url += f'/?is_allowed={is_allowed}'
-            if allowed_action:
-                url += f'&allowed_action={allowed_action}'
+            if intended_actions:
+                url += f'&intended_actions={intended_actions}'
             while next:
                 response = self.session.get(url)
                 if response.status_code == 403:
