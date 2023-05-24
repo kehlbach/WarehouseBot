@@ -6,8 +6,8 @@ from aiogram.types import CallbackQuery
 
 from app.data import callbacks as cb
 from app.data.constants import (CATEGORIES, DEPARTMENTS, PRODUCTS, PROFILES,
-                                ROLES)
-from app.data.states import Category, Department, Generic, Product, Role, User
+                                ROLES,RECEIPTS)
+from app.data.states import Category, Department, Generic, Product, Role, User, Receipt
 from app.keyboards import get_back, kb_skip
 from app.keyboards.department import edit_department_location
 from app.keyboards.product import get_product_categories, kb_get_units
@@ -40,6 +40,7 @@ async def generic_message_request(callback_query: CallbackQuery, callback_data: 
         Product.Edit.NAME: 'Введите наименование товара:',
         Product.Edit.UNIT: 'Введите или выберите единицу измерения:',
         Product.Edit.VENDOR_CODE: 'Введите артикул (код товара):',
+        Receipt.Edit.NOTE: 'Введите примечание:',
     }
 
     get_reply_markup = {
@@ -61,6 +62,7 @@ async def generic_message_request(callback_query: CallbackQuery, callback_data: 
         Product.Edit.NAME: ['product_id'],
         Product.Edit.UNIT: ['product_id'],
         Product.Edit.VENDOR_CODE: ['product_id'],
+        Receipt.Edit.NOTE: ['receipt_id']
     }
 
     reply_markup = get_reply_markup.get(action, None)
@@ -197,6 +199,12 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
             data['product_id'],
             requester=message.chat.id,
             units=processed_data
+        ),
+        Receipt.Edit.NOTE: lambda: db.edit_patch(
+            db.RECEIPTS,
+            data['receipt_id'],
+            requester=message.chat.id,
+            note=processed_data
         )
     }
 
@@ -238,6 +246,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Edit.NAME: lambda: 'Название товара изменено на "{}".'.format(db_response['name']),
         Product.Edit.VENDOR_CODE: lambda: 'Артикул (код товара) товара изменен на "{}".'.format(db_response['vendor_code']),
         Product.Edit.UNIT: lambda: 'Единицы измерения товара изменены на "{}".'.format(db_response['units']),
+        Receipt.Edit.NOTE: lambda: 'Примечание было изменено на "{}".'.format(db_response['note']),
     }
     get_reply_markup = {
         User.Edit.NAME: lambda: get_back(PROFILES, data['profile_id']),
@@ -265,6 +274,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Edit.NAME: lambda: get_back(PRODUCTS, data['product_id']),
         Product.Edit.VENDOR_CODE: lambda: get_back(PRODUCTS, data['product_id']),
         Product.Edit.UNIT: lambda: get_back(PRODUCTS, data['product_id']),
+        Receipt.Edit.NOTE: lambda: get_back(RECEIPTS, [db_response['to_department'],data['receipt_id']]),
     }
 
     process_input = get_data_processor.get(action, lambda: (message.text, True, ''))
