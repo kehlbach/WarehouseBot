@@ -26,13 +26,15 @@ async def process_menu_init(callback_query: CallbackQuery, callback_data: dict, 
             **_prepare_menu(master)
         )
     except BadRequest:
-        await bot.delete_message(
-            chat_id=callback_query.message.chat.id, 
-            message_id=callback_query.message.message_id)
-        await bot.send_message(
-            chat_id=callback_query.message.chat.id,
-            **_prepare_menu(master)
-        )
+        try:
+            await bot.delete_message(
+                chat_id=callback_query.message.chat.id, 
+                message_id=callback_query.message.message_id)
+        finally:
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                **_prepare_menu(master)
+            )
 
 
 
@@ -78,14 +80,15 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
             text= text,
             reply_markup=reply_markup)
     except BadRequest:
-        await bot.delete_message(
-            chat_id=callback_query.message.chat.id, 
-            message_id=callback_query.message.message_id)
-        await bot.send_message(
-            chat_id=callback_query.message.chat.id,
-            text=text,
-            reply_markup=reply_markup
-        )
+        try:
+            await bot.delete_message(
+                chat_id=callback_query.message.chat.id, 
+                message_id=callback_query.message.message_id)
+        finally:
+            await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                **_prepare_menu(master)
+            )
 
 
 
