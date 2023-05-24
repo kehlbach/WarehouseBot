@@ -121,6 +121,11 @@ async def general_error_handler(update, exception):
             return await bot.send_message(chat_id, 'Нет соединения с базой данных')
         case exceptions.MessageNotModified:
             logging.error(f'⭕ Message not modified')
+        case PermissionError():
+            if 'callback_query' in update:
+                return await update.callback_query.answer('Недостаточно прав для выполнения данного действия')
+            elif 'message' in update:
+                return await update.message.answer('Недостаточно прав для выполнения данного действия')
         case _:
             logging.exception(f'⭕Exception {exception} Exception⭕')
             logging.error(f'\nTraceback ends⭕')
