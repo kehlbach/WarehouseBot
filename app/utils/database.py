@@ -31,7 +31,7 @@ class Database:
         }
         self._permissions = {}
 
-    def get(self, subject: str, id: int = '', is_allowed = None, intended_actions=None) -> dict | list[dict]:
+    def get(self, subject: str, id: int = '', requester = None, intended_actions=None) -> dict | list[dict]:
         """
         Get all entities by subject: 
         >>> db.get(db.PROFILES)
@@ -42,8 +42,8 @@ class Database:
         url = f'{self.URL}/{subject}'
         if id or subject in ['actions', 'subjects']:
             url += f'/{id}'
-            if is_allowed:
-                url += f'/?is_allowed={is_allowed}'
+            if requester:
+                url += f'/?requester={requester}'
             if intended_actions:
                 url += f'&intended_actions={intended_actions}'
             response = self.session.get(url)
@@ -55,8 +55,8 @@ class Database:
         else:
             result = []
             next = True
-            if is_allowed:
-                url += f'/?is_allowed={is_allowed}'
+            if requester:
+                url += f'/?requester={requester}'
             if intended_actions:
                 url += f'&intended_actions={intended_actions}'
             while next:
@@ -73,13 +73,13 @@ class Database:
                 url = response['next']
             return result
 
-    def add(self, _subject,is_allowed = None, **data) -> dict:
+    def add(self, _subject,requester = None, **data) -> dict:
         """usage examples:
         >>> data = {'name':..}; db.add(subject=db.PROFILES, **data)
         >>> db.add(subject=db.PROFILES,name='..',..)"""
         url = f'{self.URL}/{_subject}/'
-        if is_allowed:
-            url += f'?is_allowed={is_allowed}'
+        if requester:
+            url += f'?requester={requester}'
         response = self.session.post(url, data=data)
         if response.status_code == 403:
             raise PermissionError
@@ -89,21 +89,21 @@ class Database:
             pass
         return response
 
-    def edit_put(self, subject, object, is_allowed = None, **data) -> dict:
+    def edit_put(self, subject, object, requester = None, **data) -> dict:
         """For operations with ManyToMany, as patch cannot set None for them"""
         # response = self.session.put(f'{self.URL}/{table}/{id}/', data=data)
         for key, value in data.items():
             object[key] = value
         url = f'{self.URL}/{subject}/{object["id"]}/'
-        if is_allowed:
-            url += f'?is_allowed={is_allowed}'
+        if requester:
+            url += f'?requester={requester}'
         response = self.session.put(url, data=object)
         if response.status_code == 403:
             raise PermissionError
         response = response.json()
         return response
 
-    def edit_patch(self, subject, id, is_allowed = None, **data) -> dict:
+    def edit_patch(self, subject, id, requester = None, **data) -> dict:
         """For anything except ManyToMany.
 
         Examples:
@@ -115,18 +115,18 @@ class Database:
         >>> db.edit_patch(db.PROFILES, id, **data)
         """
         url = f'{self.URL}/{subject}/{id}/'
-        if is_allowed:
-            url += f'?is_allowed={is_allowed}'
+        if requester:
+            url += f'?requester={requester}'
         response = self.session.patch(url, data=data)
         if response.status_code == 403:
             raise PermissionError
         response = response.json()
         return response
 
-    def delete(self, subject, id, is_allowed = None):
+    def delete(self, subject, id, requester = None):
         url = f'{self.URL}/{subject}/{id}/'
-        if is_allowed:
-            url += f'?is_allowed={is_allowed}'
+        if requester:
+            url += f'?requester={requester}'
         response = self.session.delete(url)
         if response.status_code == 403:
             raise PermissionError
