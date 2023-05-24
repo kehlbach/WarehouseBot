@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
 import logging
 from app.data import callbacks as cb
 from app.data.constants import DELETE, EDIT, VIEW, RECEIPTS
-#from app.keyboards import *
+# from app.keyboards import *
 from app import keyboards as kb
 from app.data.states import Receipt
 from app.loader import bot, db, dp
@@ -23,14 +23,14 @@ async def work_on_receipts(callback_query: CallbackQuery, callback_data: dict, s
         dep = db.get(db.DEPARTMENTS, callback_data['data'])
         text = 'Отделение: {}\nВыберите накладную'.format(dep['repr'])
         reply_markup = kb.get_receipts(master, receipts_page, callback_data.get('page', 1),
-                                    department=callback_data['data'])
+                                       department=callback_data['data'])
     else:  # All available departments
         receipts_page = db.get_page(db.RECEIPTS,
                                     callback_data.get('page', 1),
                                     allowed_to=master['id'])
         text = 'Накладные по всем отделениям\nВыберите накладную'
         reply_markup = kb.get_receipts(master, receipts_page, callback_data.get('page', 1),
-                                    department=callback_data['data'])
+                                       department=callback_data['data'])
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
@@ -127,7 +127,7 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
     if action != Receipt.Create.DEPARTMENT:
         department_id = callback_data['department_id']
         if action in (Receipt.Create.FROM_DEP, Receipt.Create.FROM_DEP_ONLY):
-            departments_summary = db.filter(db.INVENTORY_SUMMARY,department=department_id,return_list=True)
+            departments_summary = db.filter(db.INVENTORY_SUMMARY, department=department_id, return_list=True)
             non_empty_departments = set([d['department'] for d in departments_summary if d['quantity'] > 0])
             if int(department_id) not in non_empty_departments:
                 return await callback_query.answer('В отделении нет товаров')
@@ -226,7 +226,7 @@ async def handler_create_product(callback_query: CallbackQuery, callback_data: d
                     rp = db.filter(db.RECEIPT_PRODUCTS, receipt=receipt_id, product=product_id)
                     quantity = rp['quantity'] if rp else 0
                     data['available'] = int(available)
-                    text = text.replace('\n','\nДоступно: {}\n'.format(available+quantity))
+                    text = text.replace('\n', '\nДоступно: {}\n'.format(available+quantity))
             reply_markup = None
             return await bot.edit_message_text(
                 chat_id=callback_query.from_user.id,
@@ -237,9 +237,6 @@ async def handler_create_product(callback_query: CallbackQuery, callback_data: d
         # case Receipt.Create.PRODUCT_ABORT:
         #     products_page = db.get_page(db.PRODUCTS)
         #     reply_markup= kb_add_product(master, products_page, receipt_id, 1)
-
-
-    
 
 
 @dp.message_handler(state=Receipt.Create.quantity)
@@ -312,6 +309,7 @@ async def create_note(message: Message, state: FSMContext):
             requester=message.chat.id)
     return await message.answer(text=text, reply_markup=reply_markup)
 
+
 @dp.callback_query_handler(cb.generic.filter(state=Receipt.Edit.DELETE), state='*')
 async def delete_receipt(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     receipt_id = callback_data['data']
@@ -340,10 +338,10 @@ async def delete_receipt(callback_query: CallbackQuery, callback_data: dict, sta
             text = 'Ошибка при удалении накладной'
     reply_markup = kb.get_back(RECEIPTS)
     cb_add_data = {
-            'state': Receipt.Create.INIT,
-            'action': Receipt.Create.INIT,
-            'data': '',
-        }
+        'state': Receipt.Create.INIT,
+        'action': Receipt.Create.INIT,
+        'data': '',
+    }
     reply_markup.add(InlineKeyboardButton(
         'Добавить накладную', callback_data=cb.generic.new(**cb_add_data)))
     return await bot.edit_message_text(

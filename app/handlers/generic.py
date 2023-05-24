@@ -278,6 +278,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         db_response = execute_db_operation()
     if db_response and 'already exists' in str(db_response.values()):
         return await message.answer('Объект с такими данными уже существует.')
+
     data['action'] = get_next_action.get(action, action)
     await set_state.get(action, state.finish)()
     if action in set_state_data.keys():
