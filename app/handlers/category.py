@@ -24,6 +24,9 @@ async def edit_category_init(callback_query: CallbackQuery, callback_data: dict,
             master,
             category=category,
         )
+    else:
+        text = 'Нет доступа'
+        reply_markup = get_back()
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
