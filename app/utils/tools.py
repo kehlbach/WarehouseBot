@@ -25,30 +25,6 @@ def permissions(profile):
     return dict(json.loads(profile['permissions']))
 
 
-def has_permissions():
-    from app.loader import db
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            if isinstance(args[0], types.Message):
-                state = kwargs['state']
-                current_state = await state.get_state()
-                if current_state not in (Login.number.state, Login.name.state):
-                    message = args[0]
-                    user_id = message.from_id
-                    profile = db.filter(db.PROFILES, user_id=user_id)
-                    if not (profile and profile['permissions']):
-                        return await message.answer('Нет прав.')
-            elif isinstance(args[0], types.CallbackQuery):
-                callback_query = args[0]
-                user_id = callback_query.from_user.id
-                profile = db.filter(db.PROFILES, user_id=user_id)
-                if not (profile and profile['permissions']):
-                    return await callback_query.answer('Нет прав.')
-            return await func(*args, **kwargs)
-        return wrapper
-    return decorator
-
 
 def generate_png(headers, rows):
     font_size = 20

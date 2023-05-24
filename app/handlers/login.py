@@ -52,7 +52,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=Login.number, content_types=types.ContentType.CONTACT)
-@tools.has_permissions()
+# @tools.has_permissions()
 async def process_number(message: types.Message, state: FSMContext):
     formatted_number, is_valid, error_text = number_preprocessor(message=message, login=True)
     if not is_valid:

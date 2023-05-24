@@ -39,7 +39,7 @@ async def process_menu_init(callback_query: CallbackQuery, callback_data: dict, 
 
 
 @dp.callback_query_handler(cb.menu_item.filter(state=Menu.CHOICE), state='*')
-@tools.has_permissions()
+#@tools.has_permissions()
 async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     user_id = callback_query['from']['id']
     master = db.filter(db.PROFILES, user_id=user_id)
