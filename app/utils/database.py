@@ -148,7 +148,7 @@ class Database:
         response = response.json()
         return response
 
-    def delete(self, subject, id, requester = None):
+    def delete(self, subject, id, requester = None, raise_error = True) -> dict:
         """ Delete entity
 
         requester is Telegram user_id of user requesting the action.
@@ -161,7 +161,7 @@ class Database:
         if requester:
             url += f'?requester={requester}'
         response = self.session.delete(url)
-        if response.status_code == 403:
+        if response.status_code == 403 and raise_error:
             raise PermissionError
         return response
 
