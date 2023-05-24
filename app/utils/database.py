@@ -31,7 +31,7 @@ class Database:
         }
         self._permissions = {}
 
-    def get(self, subject: str, id: int = '') -> dict | list[dict]:
+    def get(self, subject: str, id: int = '', is_allowed = None, allowed_action=None) -> dict | list[dict]:
         """
         Get all entities by subject: 
         >>> db.get(db.PROFILES)
@@ -42,15 +42,28 @@ class Database:
         url = f'{self.URL}/{subject}'
         if id or subject in ['actions', 'subjects']:
             url += f'/{id}'
+            if is_allowed:
+                url += f'/?is_allowed={is_allowed}'
+            if allowed_action:
+                url += f'&allowed_action={allowed_action}'
             response = self.session.get(url)
             if response.status_code == 404:
                 return []
+            if response.status_code == 403:
+                raise PermissionError
             return response.json()
         else:
             result = []
             next = True
+            if is_allowed:
+                url += f'/?is_allowed={is_allowed}'
+            if allowed_action:
+                url += f'&allowed_action={allowed_action}'
             while next:
-                response = self.session.get(url).json()
+                response = self.session.get(url)
+                if response.status_code == 403:
+                    raise PermissionError
+                response = response.json()
                 if 'results' in response.keys():
                     result = result + response['results']
                 else:
@@ -60,28 +73,37 @@ class Database:
                 url = response['next']
             return result
 
-    def add(self, _subject, **data) -> dict:
+    def add(self, _subject,is_allowed = None, **data) -> dict:
         """usage examples:
         >>> data = {'name':..}; db.add(subject=db.PROFILES, **data)
         >>> db.add(subject=db.PROFILES,name='..',..)"""
-        response = self.session.post(f'{self.URL}/{_subject}/', data=data)
+        url = f'{self.URL}/{_subject}/'
+        if is_allowed:
+            url += f'?is_allowed={is_allowed}'
+        response = self.session.post(url, data=data)
+        if response.status_code == 403:
+            raise PermissionError
         try:
             response = response.json()
         except:
             pass
         return response
 
-    def edit_put(self, subject, object, **data) -> dict:
+    def edit_put(self, subject, object, is_allowed = None, **data) -> dict:
         """For operations with ManyToMany, as patch cannot set None for them"""
         # response = self.session.put(f'{self.URL}/{table}/{id}/', data=data)
         for key, value in data.items():
             object[key] = value
-        response = self.session.put(
-            f'{self.URL}/{subject}/{object["id"]}/', data=object)
+        url = f'{self.URL}/{subject}/{object["id"]}/'
+        if is_allowed:
+            url += f'?is_allowed={is_allowed}'
+        response = self.session.put(url, data=object)
+        if response.status_code == 403:
+            raise PermissionError
         response = response.json()
         return response
 
-    def edit_patch(self, subject, id, **data) -> dict:
+    def edit_patch(self, subject, id, is_allowed = None, **data) -> dict:
         """For anything except ManyToMany.
 
         Examples:
@@ -92,14 +114,22 @@ class Database:
 
         >>> db.edit_patch(db.PROFILES, id, **data)
         """
-        response = self.session.patch(
-            f'{self.URL}/{subject}/{id}/', data=data)
+        url = f'{self.URL}/{subject}/{id}/'
+        if is_allowed:
+            url += f'?is_allowed={is_allowed}'
+        response = self.session.patch(url, data=data)
+        if response.status_code == 403:
+            raise PermissionError
         response = response.json()
         return response
 
-    def delete(self, subject, id):
-        response = self.session.delete(f'{self.URL}/{subject}/{id}/')
-        response = response
+    def delete(self, subject, id, is_allowed = None):
+        url = f'{self.URL}/{subject}/{id}/'
+        if is_allowed:
+            url += f'?is_allowed={is_allowed}'
+        response = self.session.delete(url)
+        if response.status_code == 403:
+            raise PermissionError
         return response
 
     def filter(self, _subject, return_list = False, **conditions) -> list[dict] | dict:
@@ -110,6 +140,8 @@ class Database:
             value = str(value).replace('+', r'%2B')
             url += f'{field}={value}&'
         response = self.session.get(url)
+        if response.status_code == 403:
+            raise PermissionError
         if 'Select a valid choice' in str(response.json()):
             return []
         result = response.json()['results']
@@ -126,13 +158,15 @@ class Database:
         url = f'{self.URL}/{subject}/?page={page}'
         for key, value in arg.items():
             url += f'&{key}={value}'
-        response = self.session.get(url).json()
-        return response
+        response = self.session.get(url)
+        if response.status_code == 403:
+            raise PermissionError
+        return response.json()
 
     def next_page(self, response):
         next = response['next']
-        response = self.session.get(next).json()
-        return response
+        response = self.session.get(next)
+        return response.json()
 
     def prev_page(self, response):
         previous = response['previous']
