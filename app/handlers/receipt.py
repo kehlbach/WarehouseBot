@@ -98,7 +98,9 @@ async def create_receipt_type(callback_query: CallbackQuery, callback_data: dict
     page = callback_data.get('data', 1)
     user_id = callback_query['from']['id']
     master = db.filter(db.PROFILES, user_id=user_id)
-    receipt = db.add(db.RECEIPTS,made_by=master['id'])
+    receipt = db.add(db.RECEIPTS,
+                     made_by=master['id'],
+                     requester=callback_query.message.chat.id)
     departments_page = db.get_page(db.DEPARTMENTS, page, allowed_to=master['id'])
     reply_markup = kb.kb_get_create_department(master, departments_page, action, page, receipt_id=receipt['id'])
     match action:
@@ -254,8 +256,12 @@ async def create_product_quantity(message: Message, state: FSMContext):
         if quantity != 0:
             rp = db.filter(db.RECEIPT_PRODUCTS, receipt=receipt_id, product=product_id)
             quantity_old = rp['quantity'] if rp else 0
-            if 'available' in data and data['available']+quantity_old>=quantity or not('available' in data):
-                receipt_product = db.add(db.RECEIPT_PRODUCTS, receipt=receipt_id, product=product_id, quantity=quantity)
+            if 'available' in data and data['available']+quantity_old >= quantity or not ('available' in data):
+                receipt_product = db.add(db.RECEIPT_PRODUCTS,
+                                         receipt=receipt_id,
+                                         product=product_id,
+                                         quantity=quantity,
+                                         requester=message.chat.id)
                 if 'non_field_errors' in receipt_product:
                     if receipt_product['non_field_errors'][0] == 'The fields receipt, product, price must make a unique set.':
                         db.delete(db.RECEIPT_PRODUCTS, id=rp['id'], requester=message.chat.id)

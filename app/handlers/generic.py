@@ -110,6 +110,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
             user_id=processed_data),
         User.Create.NUMBER: lambda: db.add(
             db.PROFILES,
+            requester=message.chat.id,
             phone_number=processed_data,
             role=db.filter(db.ROLES, name='Без прав')['id'],
             user_id=processed_data
@@ -122,6 +123,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
             user_id=processed_data),
         Category.Create.NAME: lambda: db.add(
             db.CATEGORIES,
+            requester=message.chat.id,
             name=processed_data
         ),
         Category.Edit.NAME: lambda: db.edit_patch(
@@ -132,6 +134,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         ),
         Department.Create.NAME: lambda: db.add(
             db.DEPARTMENTS,
+            requester=message.chat.id,
             name=processed_data
         ),
         Department.Create.LOCATION: lambda: db.edit_patch(
@@ -154,6 +157,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         ),
         Role.Create.NAME: lambda: db.add(
             db.ROLES,
+            requester=message.chat.id,
             name=processed_data
         ),
         Role.Edit.NAME: lambda: db.edit_patch(
@@ -164,6 +168,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         ),
         Product.Create.NAME: lambda: db.add(
             db.PRODUCTS,
+            requester=message.chat.id,
             name=processed_data,
             vendor_code=data['vendor_code'],
             category=''

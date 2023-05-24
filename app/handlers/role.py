@@ -91,11 +91,13 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                             db.delete(db.ROLE_PERMISSIONS, each['id'], requester=callback_query.message.chat.id)
                     elif permissions[subject_id] == []:
                         for each in ALL_ACTIONS.keys():
-                            db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id, action=each)
+                            db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id,
+                                   action=each, requester=callback_query.message.chat.id)
                     else:
                         absent_rights = set(ALL_ACTIONS.keys()) - set(permissions[subject_id])
                         for each in absent_rights:
-                            db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id, action=each)
+                            db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id,
+                                   action=each, requester=callback_query.message.chat.id)
                     role = db.get(db.ROLES, role_id)
                     reply_markup = get_role_permission(action_class, role, subject_id)
                 case action_class.SUBJECT:
@@ -114,7 +116,8 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                                                     subject=subject_id, action=action_id)
                         db.delete(db.ROLE_PERMISSIONS, role_permission['id'], requester=callback_query.message.chat.id)
                     else:
-                        db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id, action=action_id)
+                        db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id,
+                               action=action_id, requester=callback_query.message.chat.id)
                     role = db.get(db.ROLES, role_id)
                     reply_markup = get_role_permission(action_class, role, subject_id)
 
