@@ -77,7 +77,7 @@ class Database:
         """usage examples:
         >>> data = {'name':..}; db.add(subject=db.PROFILES, **data)
         >>> db.add(subject=db.PROFILES,name='..',..)"""
-        url = f'{self.URL}/{_subject}/'
+        url = f'{self.URL}/{_subject}'
         if requester:
             url += f'?requester={requester}'
         response = self.session.post(url, data=data)
