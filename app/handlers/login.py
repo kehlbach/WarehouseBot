@@ -1,10 +1,5 @@
-import logging
-
-import requests.exceptions
-import urllib3.exceptions
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.utils import exceptions
 
 from app.data.constants import *
 from app.data.states import *
@@ -107,26 +102,3 @@ async def check_status(callback_query: types.CallbackQuery, state: FSMContext):
             message_id=callback_query.message.message_id,
             text=menu['text'],
             reply_markup=menu['reply_markup'])
-
-
-@dp.errors_handler()
-async def general_error_handler(update, exception):
-    match exception:
-        case requests.exceptions.ConnectionError() | urllib3.exceptions.NewConnectionError():
-            if 'callback_query' in update:
-                chat_id = update.callback_query.message.chat.id
-            elif 'message' in update:
-                chat_id = update.message.chat.id
-            logging.error(f'⭕ Нет подключения к базе данных')
-            return await bot.send_message(chat_id, 'Нет соединения с базой данных')
-        case exceptions.MessageNotModified:
-            logging.error(f'⭕ Message not modified')
-        case PermissionError():
-            if 'callback_query' in update:
-                return await update.callback_query.answer('Недостаточно прав для выполнения данного действия')
-            elif 'message' in update:
-                return await update.message.answer('Недостаточно прав для выполнения данного действия')
-        case _:
-            logging.exception(f'⭕Exception {exception} Exception⭕')
-            logging.error(f'\nTraceback ends⭕')
-            return None
