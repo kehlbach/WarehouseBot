@@ -22,6 +22,9 @@ profile['permissions'] = "{\"20\": [10, 11, 12, 13], \"21\": [10, 11, 12, 13], \
 
 
 def permissions(profile):
+    """Example usage:
+    >>> profile = db.get(db.PROFILES, user_id=user_id)
+    >>> permissions(profile)"""
     return dict(json.loads(profile['permissions']))
 
 
