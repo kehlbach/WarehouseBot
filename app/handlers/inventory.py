@@ -2,7 +2,7 @@ from datetime import datetime
 from json import loads
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
-import logging
+import logging, re
 from app.data import callbacks as cb
 from app.data.constants import DELETE, EDIT, VIEW, RECEIPTS
 # from app.keyboards import *
@@ -26,7 +26,7 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
         text = 'Все отделения\nОстатки'
         data = db.filter(db.INVENTORY_SUMMARY)
         headers = ['Отделение',"Товар", "Количество", "Ед. изм."]
-        rows = [[d['department'],d["product_name"], d["quantity"], d['product_units']] for d in data]
+        rows = [[d['department_name'],d["product_name"], d["quantity"], d['product_units']] for d in data]
     if data:
         image_buffer = tools.generate_png(headers, rows)
         reply_markup = kb.kb_view_inventory(master, department=callback_data['data'])
@@ -44,3 +44,53 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
             chat_id=callback_query.message.chat.id,
             text=text,
             reply_markup=kb.kb_view_inventory(master, department=callback_data['data']))
+
+@dp.callback_query_handler(cb.generic.filter(state=Inventory.View.BY_DATE), state='*')
+async def ask_date(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
+    user_id = callback_query['from']['id']
+    master = db.filter(db.PROFILES, user_id=user_id)
+    await Inventory.View.Date.set()
+    await state.set_data({'department': callback_data['data']})
+    return await callback_query.message.answer('Введите дату в формате YYYY-MM-DD')
+
+@dp.message_handler(state=Inventory.View.Date)
+async def view_by_date(message: Message, state: FSMContext):
+    if not re.match(r'\d{4}-\d{2}-\d{2}', message.text):
+        return await message.answer('Неверный формат даты')
+    user_id = message['from']['id']
+    master = db.filter(db.PROFILES, user_id=user_id)
+    data = await state.get_data()
+    department_id = data['department']
+    if department_id:  # specific department
+        department = db.get(db.DEPARTMENTS, department_id)
+        text = 'Отделение: {}\nОстатки'.format(department['repr'])
+        data = db.filter(db.INVENTORY_SUMMARY, department=department['id'], date=message.text)
+        headers = ["Товар", "Количество", "Ед. изм."]
+        rows = [[d["product_name"], d["quantity"], d['product_units']] for d in data]
+    else:
+        text = 'Все отделения\nОстатки'
+        data = db.filter(db.INVENTORY_SUMMARY, date=message.text)
+        headers = ['Отделение',"Товар", "Количество", "Ед. изм."]
+        rows = [[d['department_name'],d["product_name"], d["quantity"], d['product_units']] for d in data]
+    if data:
+        image_buffer = tools.generate_png(headers, rows)
+        reply_markup = kb.kb_view_inventory(master, department=department_id)
+        await bot.delete_message(
+            chat_id=message.chat.id,
+            message_id=message.message_id)
+        await bot.send_photo(
+            chat_id=message.chat.id,
+            caption=text,
+            photo=InputFile(image_buffer, filename="summary.png"),
+            reply_markup=reply_markup)
+    else:
+        text = 'Нет остатков до {}'.format(message.text)
+        await bot.delete_message(
+            chat_id=message.chat.id,
+            message_id=message.message_id)
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=text,
+            reply_markup=reply_markup)
+
+

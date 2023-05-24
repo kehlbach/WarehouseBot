@@ -50,6 +50,18 @@ def get_inventory_department(master: dict, departments_page: dict, page: int) ->
 def kb_view_inventory(master, department):
     keyboard = get_back(INVENTORY)
     permissions = tools.permissions(master)
+    cb_data = {
+        'state': Inventory.View.BY_DATE,
+        'action': Inventory.View.BY_DATE,
+    }
+    keyboard.add(InlineKeyboardButton(
+        'До определенной даты', callback_data=cb.generic.new(
+            state=Inventory.View.BY_DATE,
+            action=Inventory.View.BY_DATE,
+            data=department
+        )
+    ))
+
 
     # За определенную дату
     # Экспорт
