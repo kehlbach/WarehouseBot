@@ -35,10 +35,16 @@ async def edit_category_init(callback_query: CallbackQuery, callback_data: dict,
 @dp.callback_query_handler(cb.generic.filter(action=(Category.Edit.DELETE)), state='*')
 async def handle_category_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     category_id = callback_data['data']
-    response = db.delete(db.CATEGORIES, id=category_id)
+    response = db.delete(
+        db.CATEGORIES, 
+        id=category_id,
+        requester=callback_query.message.chat.id,
+        raise_error=False)
     reply_markup = get_back(CATEGORIES)
     if response.status_code == 204:
         text = 'Категория успешно удалена.'
+    elif response.status_code==403:
+        text = 'Нет прав на удаление категории.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(CATEGORIES, id=category_id)
         text = 'Нельзя удалить категорию, содержащую товары.'

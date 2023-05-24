@@ -254,9 +254,12 @@ async def create_product_quantity(message: Message, state: FSMContext):
                 receipt_product = db.add(db.RECEIPT_PRODUCTS, receipt=receipt_id, product=product_id, quantity=quantity)
                 if 'non_field_errors' in receipt_product:
                     if receipt_product['non_field_errors'][0] == 'The fields receipt, product, price must make a unique set.':
-                        db.delete(db.RECEIPT_PRODUCTS, id=rp['id'])
-                        receipt_product = db.add(db.RECEIPT_PRODUCTS, receipt=receipt_id,
-                                                 product=product_id, quantity=quantity+quantity_old)
+                        db.delete(db.RECEIPT_PRODUCTS, id=rp['id'], requester=message.chat.id)
+                        receipt_product = db.add(db.RECEIPT_PRODUCTS,
+                                                 receipt=receipt_id,
+                                                 product=product_id,
+                                                 quantity=quantity+quantity_old,
+                                                 requester=message.chat.id)
                         text = 'Данные о товаре "{}" были скорректированы'.format(receipt_product['product_name'])
                 else:
                     text = 'Товар "{}" добавлен в накладную'.format(receipt_product['product_name'])
@@ -298,21 +301,27 @@ async def create_note(message: Message, state: FSMContext):
 
 @dp.callback_query_handler(cb.generic.filter(state=Receipt.Edit.DELETE), state='*')
 async def delete_receipt(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
-    receipt_id= callback_data['data']
+    receipt_id = callback_data['data']
     products = db.filter(db.RECEIPT_PRODUCTS, receipt=receipt_id)
     products = [products] if not isinstance(products, list) else products
     text = ''
     for each in products:
-        local_response = db.delete(db.RECEIPT_PRODUCTS, id=each['id'])
+        local_response = db.delete(db.RECEIPT_PRODUCTS, id=each['id'], requester=callback_query.message.chat.id)
         try:
             if local_response.json()['error'][0] == "Can't delete non-latest Receipt Product":
                 text = 'Нельзя удалить накладную, которая не является последней и содержит товары.'
         except:
             pass
     if not text:
-        response = db.delete(db.RECEIPTS, id=receipt_id)
+        response = db.delete(
+            db.RECEIPTS,
+            id=receipt_id,
+            requester=callback_query.message.chat.id,
+            raise_error=False)
         if response.status_code == 204:
             text = 'Накладная удалена'
+        elif response.status_code == 403:
+            text = 'Нет прав на удаление накладной.'
         else:
             logging.error('⭕Накладная странно удалилась')
             text = 'Ошибка при удалении накладной'

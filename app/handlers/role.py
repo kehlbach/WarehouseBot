@@ -88,7 +88,7 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                     if permissions[subject_id] == list(ALL_ACTIONS.keys()):
                         role_permissions = db.filter(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id)
                         for each in role_permissions:
-                            db.delete(db.ROLE_PERMISSIONS, each['id'])
+                            db.delete(db.ROLE_PERMISSIONS, each['id'], requester=callback_query.message.chat.id)
                     elif permissions[subject_id] == []:
                         for each in ALL_ACTIONS.keys():
                             db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id, action=each)
@@ -112,7 +112,7 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                     if action_id in permissions[subject_id]:
                         role_permission = db.filter(db.ROLE_PERMISSIONS, role=role_id,
                                                     subject=subject_id, action=action_id)
-                        db.delete(db.ROLE_PERMISSIONS, role_permission['id'])
+                        db.delete(db.ROLE_PERMISSIONS, role_permission['id'], requester=callback_query.message.chat.id)
                     else:
                         db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id, action=action_id)
                     role = db.get(db.ROLES, role_id)
@@ -133,10 +133,16 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
 @dp.callback_query_handler(cb.generic.filter(action=(Role.Edit.DELETE)), state='*')
 async def handle_role_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     role_id = callback_data['data']
-    response = db.delete(db.ROLES, id=role_id)
+    response = db.delete(
+        db.ROLES,
+        id=role_id,
+        requester=callback_query.message.chat.id,
+        raise_error=False)
     reply_markup = get_back(ROLES)
     if response.status_code == 204:
         text = 'Роль успешно удалена.'
+    elif response.status_code == 403:
+        text = 'Нет прав на удаление роли.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(ROLES, data=role_id)
         text = 'Нельзя удалить роль, для которой заданы пользователи.'

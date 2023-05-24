@@ -155,9 +155,15 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
 @dp.callback_query_handler(cb.generic.filter(action=(User.Edit.DELETE)), state='*')
 async def handle_user_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     profile_id = callback_data['data']
-    response = db.delete(db.PROFILES, id=profile_id)
+    response = db.delete(
+        db.PROFILES,
+        id=profile_id,
+        requester=callback_query.message.chat.id,
+        raise_error=False)
     if response.status_code == 204:
         text = 'Пользователь успешно удален.'
+    elif response.status_code == 403:
+        text = 'Нет прав на удаление категории.'
     else:
         text = 'Произошла ошибка при удалении пользователя.'
         logging.warning('⭕тут чет пользователь не удалился')

@@ -81,10 +81,16 @@ async def handle_product_edit_category(callback_query: CallbackQuery, callback_d
 @dp.callback_query_handler(cb.generic.filter(action=(Product.Edit.DELETE)), state='*')
 async def handle_product_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     product_id = callback_data['data']
-    response = db.delete(db.PRODUCTS, id=product_id)
+    response = db.delete(
+        db.PRODUCTS,
+        id=product_id,
+        requester=callback_query.message.chat.id,
+        raise_error=False)
     reply_markup = get_back(PRODUCTS)
     if response.status_code == 204:
         text = 'Товар успешно удален.'
+    elif response.status_code == 403:
+        text = 'Нет прав на удаление товара.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(PRODUCTS, id=product_id)
         text = 'Нельзя удалить товар, для которого заданы .'

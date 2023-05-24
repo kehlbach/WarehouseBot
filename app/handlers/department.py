@@ -37,10 +37,16 @@ async def edit_department_init(callback_query: CallbackQuery, callback_data: dic
 @dp.callback_query_handler(cb.generic.filter(action=(Department.Edit.DELETE)), state='*')
 async def handle_department_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     department_id = callback_data['data']
-    response = db.delete(db.DEPARTMENTS, id=department_id)
+    response = db.delete(
+        db.DEPARTMENTS, 
+        id=department_id,
+        requester=callback_query.message.chat.id,
+        raise_error=False)
     reply_markup = get_back(DEPARTMENTS)
     if response.status_code == 204:
         text = 'Отделение успешно удалено.'
+    elif response.status_code==403:
+        text = 'Нет прав на удаление отделения.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(DEPARTMENTS, department_id)
         text = 'Нельзя удалить отделение, если в остатках в нем есть товары.'
