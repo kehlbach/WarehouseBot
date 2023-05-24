@@ -91,12 +91,14 @@ class Database:
 
         It raises error unless otherwise specified
         """
-        url = f'{self.URL}/{_subject}'
+        url = f'{self.URL}/{_subject}/'
         if requester:
-            url += f'?requester={requester}'
-        response = self.session.post(url, data=data)
-        if response.status_code == 403:
-            raise PermissionError
+            url_requester = url+f'?requester={requester}'
+            response_check = self.session.get(url_requester, data=data, allow_redirects=False)
+            if response_check.status_code == 403:
+                raise PermissionError
+        response = self.session.post(url, data=data, allow_redirects=False)
+
         try:
             response = response.json()
         except:
