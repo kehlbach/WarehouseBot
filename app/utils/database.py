@@ -38,6 +38,13 @@ class Database:
 
         Get entity by id: 
         >>> db.get(db.PROFILES,data['id'])
+
+        requester is Telegram user_id of user requesting the action.
+        If provided, requester permissions will be checked, 
+        and response will be 403 if user doesn't have permission.
+
+        It raises error unless otherwise specified
+        
         """
         url = f'{self.URL}/{subject}'
         if id or subject in ['actions', 'subjects']:
@@ -76,7 +83,14 @@ class Database:
     def add(self, _subject,requester = None, **data) -> dict:
         """usage examples:
         >>> data = {'name':..}; db.add(subject=db.PROFILES, **data)
-        >>> db.add(subject=db.PROFILES,name='..',..)"""
+        >>> db.add(subject=db.PROFILES,name='..',..)
+        
+        requester is Telegram user_id of user requesting the action.
+        If provided, requester permissions will be checked, 
+        and response will be 403 if user doesn't have permission.
+
+        It raises error unless otherwise specified
+        """
         url = f'{self.URL}/{_subject}'
         if requester:
             url += f'?requester={requester}'
@@ -90,8 +104,13 @@ class Database:
         return response
 
     def edit_put(self, subject, object, requester = None, **data) -> dict:
-        """For operations with ManyToMany, as patch cannot set None for them"""
-        # response = self.session.put(f'{self.URL}/{table}/{id}/', data=data)
+        """For operations with ManyToMany, as patch cannot set None for them
+        
+        requester is Telegram user_id of user requesting the action.
+        If provided, requester permissions will be checked, 
+        and response will be 403 if user doesn't have permission.
+
+        It raises error unless otherwise specified"""
         for key, value in data.items():
             object[key] = value
         url = f'{self.URL}/{subject}/{object["id"]}/'
@@ -113,6 +132,12 @@ class Database:
         >>> data = {name: "abc"..}
 
         >>> db.edit_patch(db.PROFILES, id, **data)
+        
+        requester is Telegram user_id of user requesting the action.
+        If provided, requester permissions will be checked, 
+        and response will be 403 if user doesn't have permission.
+
+        It raises error unless otherwise specified
         """
         url = f'{self.URL}/{subject}/{id}/'
         if requester:
@@ -124,6 +149,14 @@ class Database:
         return response
 
     def delete(self, subject, id, requester = None):
+        """ Delete entity
+
+        requester is Telegram user_id of user requesting the action.
+        If provided, requester permissions will be checked, 
+        and response will be 403 if user doesn't have permission.
+
+        It raises error unless otherwise specified
+        """
         url = f'{self.URL}/{subject}/{id}/'
         if requester:
             url += f'?requester={requester}'
