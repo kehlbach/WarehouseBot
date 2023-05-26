@@ -61,10 +61,14 @@ def kb_view_inventory(master, department):
             data=department
         )
     ))
+    keyboard.add(InlineKeyboardButton(
+        'Экспорт', callback_data=cb.generic.new(
+            state=Inventory.View.EXPORT,
+            action=Inventory.View.EXPORT,
+            data=department
+        )
+    ))
 
-
-    # За определенную дату
-    # Экспорт
 
     
 

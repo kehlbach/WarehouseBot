@@ -94,3 +94,6 @@ async def view_by_date(message: Message, state: FSMContext):
             reply_markup=reply_markup)
 
 
+@dp.callback_query_handler(cb.generic.filter(state=Inventory.View.EXPORT), state='*')
+async def export_inventory(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
+    return await callback_query.answer('Not implemented')

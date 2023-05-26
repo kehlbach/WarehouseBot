@@ -4,3 +4,4 @@ class View(StatesGroup):
     DEPARTMENT = 'ID1'
     BY_DATE = 'ID2'
     Date = State()
+    EXPORT = 'ID3'
