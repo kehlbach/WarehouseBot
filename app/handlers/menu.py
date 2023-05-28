@@ -63,14 +63,23 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
             departments_page = db.get_page(db.DEPARTMENTS,callback_data.get('page',1))
             text = 'Выберите отделение для просмотра остатков'
             reply_markup = get_inventory_department(master, departments_page, callback_data.get('page',1))
-            await bot.delete_message(
-                chat_id=callback_query.message.chat.id, 
-                message_id=callback_query.message.message_id)
-            return await bot.send_message(
-                chat_id=callback_query.message.chat.id,
-                text= text,
-                reply_markup=reply_markup
-            )
+            try:
+                await bot.edit_message_text(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id,
+                    text= text,
+                    reply_markup=reply_markup)
+            except:
+                try:
+                    await bot.delete_message(
+                        chat_id=callback_query.message.chat.id, 
+                        message_id=callback_query.message.message_id)
+                finally:
+                    return await bot.send_message(
+                        chat_id=callback_query.message.chat.id,
+                        text= text,
+                        reply_markup=reply_markup
+                    )                    
         case Menu.RECEIPTS:
             if not permissions[RECEIPTS]:
                 raise PermissionError
@@ -95,11 +104,23 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
             departments_page = db.get_page(db.DEPARTMENTS,callback_data.get('page',1))
             text = 'Выберите отделение'
             reply_markup = kb.get_departments(master,departments_page, callback_data.get('page',1))
-    await bot.edit_message_text(
-        chat_id=callback_query.message.chat.id,
-        message_id=callback_query.message.message_id,
-        text= text,
-        reply_markup=reply_markup)
+    try:
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text= text,
+            reply_markup=reply_markup)
+    except:
+        try:
+            await bot.delete_message(
+                chat_id=callback_query.message.chat.id, 
+                message_id=callback_query.message.message_id)
+        finally:
+            return await bot.send_message(
+                chat_id=callback_query.message.chat.id,
+                text= text,
+                reply_markup=reply_markup
+            )  
 
 
 @dp.callback_query_handler(cb.menu_item.filter(state=CURRENT_PAGE), state='*')
