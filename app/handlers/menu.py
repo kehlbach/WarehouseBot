@@ -64,7 +64,7 @@ async def process_menu_choice(callback_query: CallbackQuery, callback_data: dict
             text = 'Выберите отделение для просмотра остатков'
             reply_markup = get_inventory_department(master, departments_page, callback_data.get('page',1))
             try:
-                await bot.edit_message_text(
+                return await bot.edit_message_text(
                     chat_id=callback_query.message.chat.id,
                     message_id=callback_query.message.message_id,
                     text= text,
