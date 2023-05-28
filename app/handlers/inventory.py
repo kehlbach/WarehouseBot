@@ -30,20 +30,34 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
     if data:
         image_buffer = tools.generate_png(headers, rows)
         reply_markup = kb.kb_view_inventory(master, department=callback_data['data'])
-        await bot.delete_message(
-            chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id)
-        await bot.send_photo(
-            chat_id=callback_query.message.chat.id,
-            caption=text,
-            photo=InputFile(image_buffer, filename="summary.png"),
-            reply_markup=reply_markup)
+        try:
+            await bot.delete_message(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id)
+        finally:
+            await bot.send_photo(
+                chat_id=callback_query.message.chat.id,
+                caption=text,
+                photo=InputFile(image_buffer, filename="summary.png"),
+                reply_markup=reply_markup)
     else:
         text = 'Нет остатков'
-        await bot.edit_message_text(
-            chat_id=callback_query.message.chat.id,
-            text=text,
-            reply_markup=kb.kb_view_inventory(master, department=callback_data['data']))
+        keyboard = kb.kb_view_inventory(master, department=callback_data['data'])
+        try:
+            await bot.edit_message_text(
+                chat_id=callback_query.message.chat.id,
+                text=text,
+                reply_markup=keyboard)
+        except:
+            try:
+                bot.delete_message(
+                    chat_id=callback_query.message.chat.id,
+                    message_id=callback_query.message.message_id)
+            finally:
+                bot.send_message(
+                    chat_id=callback_query.message.chat.id,
+                    text=text,
+                    reply_markup=keyboard)
 
 @dp.callback_query_handler(cb.generic.filter(state=Inventory.View.BY_DATE), state='*')
 async def ask_date(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
