@@ -24,13 +24,13 @@ def name_validator(name) -> tuple[str,bool,str]:
         return name, is_valid, error_text
 
 
-def number_preprocessor(message: types.Message, source_number: str = '',profiles = [], login = False) -> tuple[str,bool,str]:
+def number_preprocessor(message: types.Message, source_number: str = '', login = False) -> tuple[str,bool,str]:
+    """Returns formatted_number, is_valid, error_text"""
     from app.loader import db
     if message.contact:
         number = message.contact.phone_number
     else:
         number = message.text
-    """Returns formatted_number, is_valid, error_text"""
     try:
         parsed_number = phonenumbers.parse(number, "KZ")
     except phonenumbers.NumberParseException:
