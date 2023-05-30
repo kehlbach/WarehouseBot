@@ -14,6 +14,9 @@ cd WarehouseBot
 python -m venv .venv
 .venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
+```
+To run the bot:
+```
 python -m app
 ```
 
