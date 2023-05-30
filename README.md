@@ -6,7 +6,6 @@
 This is bot for warehouse accounting
 
 ## Running Locally
-#### To be done later
 
 Brief example with venv
 ```cmd
@@ -15,8 +14,17 @@ cd WarehouseBot
 python -m venv .venv
 .venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
+```
+To run the bot:
+```
 python -m app
 ```
+
+If you run on linux, Bot requires font DejaVu, can be installed with similar command:
+```bash
+sudo apt-get install ttf-dejavu
+```
+
 Also requires .env file like this :
 ```
 SERVERLESS=True
