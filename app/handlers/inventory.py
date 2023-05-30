@@ -86,9 +86,9 @@ async def view_by_date(message: Message, state: FSMContext):
         data = db.filter(db.INVENTORY_SUMMARY, date=message.text)
         headers = ['Отделение',"Товар", "Количество", "Ед. изм."]
         rows = [[d['department_name'],d["product_name"], d["quantity"], d['product_units']] for d in data]
+    reply_markup = kb.kb_view_inventory(master, department=department_id)
     if data:
         image_buffer = tools.generate_png(headers, rows)
-        reply_markup = kb.kb_view_inventory(master, department=department_id)
         return await bot.send_photo(
             chat_id=message.chat.id,
             caption=text,
