@@ -89,27 +89,18 @@ async def view_by_date(message: Message, state: FSMContext):
     if data:
         image_buffer = tools.generate_png(headers, rows)
         reply_markup = kb.kb_view_inventory(master, department=department_id)
-        try:
-            await bot.delete_message(
-                chat_id=message.chat.id,
-                message_id=message.message_id)
-        finally:
-            await bot.send_photo(
-                chat_id=message.chat.id,
-                caption=text,
-                photo=InputFile(image_buffer, filename="summary.png"),
-                reply_markup=reply_markup)
+        return await bot.send_photo(
+            chat_id=message.chat.id,
+            caption=text,
+            photo=InputFile(image_buffer, filename="summary.png"),
+            reply_markup=reply_markup)
     else:
         text = 'Нет остатков до {}'.format(message.text)
-        try:
-            await bot.delete_message(
-                chat_id=message.chat.id,
-                message_id=message.message_id)
-        finally:
-            await bot.send_message(
-                chat_id=message.chat.id,
-                text=text,
-                reply_markup=reply_markup)
+
+        return await bot.send_message(
+            chat_id=message.chat.id,
+            text=text,
+            reply_markup=reply_markup)
 
 
 @dp.callback_query_handler(cb.generic.filter(state=Inventory.View.EXPORT), state='*')
