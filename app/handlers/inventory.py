@@ -77,7 +77,7 @@ async def view_by_date(message: Message, state: FSMContext):
     department_id = data['department']
     if department_id:  # specific department
         department = db.get(db.DEPARTMENTS, department_id)
-        text = 'Отделение: {}\nОстатки'.format(department['repr'])
+        text = 'Отделение: {}\nОстатки\nДата - {}'.format(department['repr'], message.text)
         data = db.filter(db.INVENTORY_SUMMARY, department=department['id'], date=message.text)
         headers = ["Товар", "Количество", "Ед. изм."]
         rows = [[d["product_name"], d["quantity"], d['product_units']] for d in data]
