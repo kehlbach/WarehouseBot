@@ -27,12 +27,14 @@ def name_validator(name) -> tuple[str,bool,str]:
 def number_preprocessor(message: types.Message, source_number: str = '', login = False) -> tuple[str,bool,str]:
     """Returns formatted_number, is_valid, error_text"""
     from app.loader import db
+    from app.utils.config import COUNTRY_CODE
     if message.contact:
         number = message.contact.phone_number
+        number = '+' + number.lstrip('+') #ensures + in beginning
     else:
         number = message.text
     try:
-        parsed_number = phonenumbers.parse(number, "KZ")
+        parsed_number = phonenumbers.parse(number, COUNTRY_CODE)
     except phonenumbers.NumberParseException:
         is_valid=False
         error_text = 'Некорректный номер. Попробуйте снова.'

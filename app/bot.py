@@ -8,7 +8,7 @@ from pyngrok import ngrok
 
 
 from app.utils.config import (NGROK, SERVERLESS, WEBAPP_HOST, WEBAPP_PORT,
-                              WEBHOOK_HOST, WEBHOOK_PATH, ADMIN_NUMBER)
+                              WEBHOOK_HOST, WEBHOOK_PATH, ADMIN_NUMBER, COUNTRY_CODE)
 from app.loader import bot, dp, db
 from app.utils.processors import number_preprocessor
 
@@ -35,7 +35,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     else:
         logging.info("🟢 Bot launched!")
     try:
-        parsed_number = phonenumbers.parse(ADMIN_NUMBER, "KZ")
+        parsed_number = phonenumbers.parse(ADMIN_NUMBER, COUNTRY_CODE)
         formatted_number = phonenumbers.format_number(
             parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
     except phonenumbers.NumberParseException:
