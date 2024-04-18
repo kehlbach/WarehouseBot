@@ -25,23 +25,23 @@ If you run on linux, Bot requires font DejaVu, can be installed with similar com
 sudo apt-get install ttf-dejavu
 ```
 
-Also requires .env file like this :
-```
-SERVERLESS=True
-NGROK=True
-API_TOKEN=[YOUR API TOKEN]
-DB_LOGIN=
-DB_PASSWORD=
-DB_API_URL=[URL]
-ADMIN_NUMBER=
-WEBHOOK_HOST=[URL]
-WEBAPP_HOST=127.0.0.1
-WEBAPP_PORT=5000
-```
-SERVERLESS=True for webhook or False for longpoll.
+Create .env based on .env.example.
 
 App can use ngrok for webhook
 Webhook host will only be used only if SERVERLESS=True and NGROK=False.
 
 Database is REST API Service, specifically this:
 [WarehouseDatabase](https://github.com/valentinkelbakh/WarehouseDatabase "WarehouseDatabase")
+
+## Features
+
+
+The bot supports multiple users, authenticated via phone numbers. Key entities include User, Role, Department, Category, Product, Receipt, and Inventory.
+
+Users are assigned roles determining their access privileges. Products are associated with departments and may belong to categories (with each product tied to one category).
+
+Adding, moving, or removing products involves creating Receipts, specifying product details and their source/destination. The Inventory feature enables viewing departmental inventory in real-time or at specified dates.
+
+Entities can be added, modified, or deleted, except for Inventory, which is read-only. Deletion of entities is allowed only if entity is not in use.
+
+At the moment, bot only works in russian language.
