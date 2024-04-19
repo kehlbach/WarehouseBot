@@ -8,7 +8,6 @@ class Create(StatesGroup):
     FROM_DEP = 'REC4'
     TO_DEP = 'REC5'
     PRODUCT = 'REC6'
-    #QUANTITY = 'RC7'
     quantity = State()
     note = State()
     DONE = 'REC8'

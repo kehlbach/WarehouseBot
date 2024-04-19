@@ -1,14 +1,19 @@
 
+import logging
+from json import loads
+
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 
 from app.data import callbacks as cb
-from app.data.constants import DELETE, EDIT, ROLES, VIEW
+from app.data.constants import (ALL_ACTIONS, ALL_SUBJECTS, DELETE, EDIT, ROLES,
+                                VIEW)
 from app.data.states import Role
-from app.keyboards import *
+from app.keyboards.menu import get_back
+from app.keyboards.role import (edit_role, get_role_permission,
+                                get_role_permissions)
 from app.loader import bot, db, dp
 from app.utils import tools
-from app.utils.processors import *
 
 
 @dp.callback_query_handler(cb.generic.filter(state=Role.Edit.MENU), state='*')
@@ -20,7 +25,8 @@ async def edit_role_init(callback_query: CallbackQuery, callback_data: dict, sta
     if set([VIEW, EDIT, DELETE]).intersection(permissions[ROLES]):
         role = db.get(db.ROLES, role_id)
         permissions_text = role['permissions_repr']
-        replaces = {' ': '\n    ', ',': ', ', ':': ': ', 'view, add, edit, delete': 'full access'}
+        replaces = {' ': '\n    ', ',': ', ', ':': ': ',
+                    'view, add, edit, delete': 'full access'}
         for key, value in replaces.items():
             permissions_text = permissions_text.replace(key, value)
         text = 'Role: ' + role['name']+'\nPermissions: \n    '+permissions_text
@@ -34,7 +40,6 @@ async def edit_role_init(callback_query: CallbackQuery, callback_data: dict, sta
         text=text,
         reply_markup=reply_markup
     )
-
 
 
 @dp.callback_query_handler(cb.role_permissions.filter(
@@ -59,7 +64,8 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
     permissions = tools.permissions(master)
     role_id = int(callback_data['role_id'])
     permissions_class = Role.Edit.Permissions
-    permissions_field_values = [getattr(permissions_class, attr) for attr in dir(permissions_class)]
+    permissions_field_values = [
+        getattr(permissions_class, attr) for attr in dir(permissions_class)]
     if action in permissions_field_values:
         action_class = Role.Edit.Permissions
     else:
@@ -83,44 +89,55 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                     reply_markup = get_role_permissions(action_class, role)
                 case action_class.ALL:
                     subject_id = int(callback_data['subject_id'])
-                    text = 'Select permissions for role "{}":'.format(ALL_SUBJECTS[subject_id])
+                    text = 'Select permissions for role "{}":'.format(
+                        ALL_SUBJECTS[subject_id])
                     role = db.get(db.ROLES, role_id)
                     permissions = dict(loads(role['permissions']))
                     if permissions[subject_id] == list(ALL_ACTIONS.keys()):
-                        role_permissions = db.filter(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id)
+                        role_permissions = db.filter(
+                            db.ROLE_PERMISSIONS, role=role_id, subject=subject_id)
                         for each in role_permissions:
-                            db.delete(db.ROLE_PERMISSIONS, each['id'], requester=callback_query.message.chat.id)
+                            db.delete(
+                                db.ROLE_PERMISSIONS, each['id'], requester=callback_query.message.chat.id)
                     elif permissions[subject_id] == []:
                         for each in ALL_ACTIONS.keys():
                             db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id,
                                    action=each, requester=callback_query.message.chat.id)
                     else:
-                        absent_rights = set(ALL_ACTIONS.keys()) - set(permissions[subject_id])
+                        absent_rights = set(
+                            ALL_ACTIONS.keys()) - set(permissions[subject_id])
                         for each in absent_rights:
                             db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id,
                                    action=each, requester=callback_query.message.chat.id)
                     role = db.get(db.ROLES, role_id)
-                    reply_markup = get_role_permission(action_class, role, subject_id)
+                    reply_markup = get_role_permission(
+                        action_class, role, subject_id)
                 case action_class.SUBJECT:
                     role = db.get(db.ROLES, role_id)
                     subject_id = int(callback_data['subject_id'])
-                    text = 'Select permissions for role "{}":'.format(ALL_SUBJECTS[subject_id])
-                    reply_markup = get_role_permission(action_class, role, subject_id)
+                    text = 'Select permissions for role "{}":'.format(
+                        ALL_SUBJECTS[subject_id])
+                    reply_markup = get_role_permission(
+                        action_class, role, subject_id)
                 case action_class.SPECIFIC:
                     subject_id = int(callback_data['subject_id'])
                     action_id = int(callback_data['action_id'])
                     role = db.get(db.ROLES, role_id)
-                    permissions = permissions = dict(loads(role['permissions']))
-                    text = 'Select permissions for role "{}":'.format(ALL_SUBJECTS[subject_id])
+                    permissions = permissions = dict(
+                        loads(role['permissions']))
+                    text = 'Select permissions for role "{}":'.format(
+                        ALL_SUBJECTS[subject_id])
                     if action_id in permissions[subject_id]:
                         role_permission = db.filter(db.ROLE_PERMISSIONS, role=role_id,
                                                     subject=subject_id, action=action_id)
-                        db.delete(db.ROLE_PERMISSIONS, role_permission['id'], requester=callback_query.message.chat.id)
+                        db.delete(
+                            db.ROLE_PERMISSIONS, role_permission['id'], requester=callback_query.message.chat.id)
                     else:
                         db.add(db.ROLE_PERMISSIONS, role=role_id, subject=subject_id,
                                action=action_id, requester=callback_query.message.chat.id)
                     role = db.get(db.ROLES, role_id)
-                    reply_markup = get_role_permission(action_class, role, subject_id)
+                    reply_markup = get_role_permission(
+                        action_class, role, subject_id)
 
         elif role_id == master['role']:
             return await callback_query.answer('Unable to change permissions for your role.')

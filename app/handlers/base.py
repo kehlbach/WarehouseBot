@@ -7,11 +7,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import exceptions
 
-from app.data.constants import *
-from app.data.states import *
-from app.keyboards import *
+from app.keyboards.menu import get_back
 from app.loader import bot, dp
-from app.utils.processors import *
 
 
 @dp.message_handler(state='*', commands='cancel')
@@ -27,6 +24,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     logging.info('Cancelling state %r', current_state)
     await state.finish()
     await message.reply('Action canceled.', reply_markup=types.ReplyKeyboardRemove())
+
 
 @dp.errors_handler()
 async def general_error_handler(update: types.Update, exception: Exception):

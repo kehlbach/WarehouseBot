@@ -1,11 +1,12 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from app.data.constants import *
-from app.data.states import *
-from app.keyboards import *
+from app.data import callbacks as cb
+from app.data.states import Login
+from app.keyboards.menu import get_main_menu, kb_check_status, kb_send_number
 from app.loader import bot, db, dp
-from app.utils.processors import *
+from app.utils import tools
+from app.utils.processors import name_validator, number_preprocessor
 
 
 def WELCOME(master): return 'Welcome.\n' +\
@@ -26,7 +27,6 @@ def _prepare_menu(master):
             '/start to register'
         reply_markup = None
     return {'text': text, 'reply_markup': reply_markup}
-
 
 
 @dp.message_handler(commands='start', state='*')
@@ -52,16 +52,17 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=Login.number, content_types=types.ContentType.CONTACT)
-# @tools.has_permissions()
 async def process_number(message: types.Message, state: FSMContext):
-    formatted_number, is_valid, error_text = number_preprocessor(message=message, login=True)
+    formatted_number, is_valid, error_text = number_preprocessor(
+        message=message, login=True)
     if not is_valid:
         return await message.answer(error_text)
     profile = db.filter(db.PROFILES, phone_number=formatted_number)
     if profile:
         if profile['name']:
             await state.finish()
-            profile = db.edit_patch(db.PROFILES, profile['id'], user_id=message.from_id)
+            profile = db.edit_patch(
+                db.PROFILES, profile['id'], user_id=message.from_id)
             return await message.answer(**_prepare_menu(profile))
     else:
         profile = db.add(

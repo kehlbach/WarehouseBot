@@ -31,7 +31,7 @@ class Database:
         }
         self._permissions = {}
 
-    def get(self, subject: str, id: int = '', requester = None, intended_actions=None) -> dict | list[dict]:
+    def get(self, subject: str, id: int = '', requester=None, intended_actions=None) -> dict | list[dict]:
         """
         Get all entities by subject: 
         >>> db.get(db.PROFILES)
@@ -76,18 +76,19 @@ class Database:
                 url = response['next']
             return result
 
-    def add(self, _subject,requester = None, **data) -> dict:
+    def add(self, _subject, requester=None, **data) -> dict:
         """usage examples:
         >>> data = {'name':..}; db.add(subject=db.PROFILES, **data)
         >>> db.add(subject=db.PROFILES,name='..',..)
-        
+
         requester is Telegram user_id of user requesting the action.
         If provided, requester permissions will be checked.
         If not enough permissions, raises exception, unless otherwise specified."""
         url = f'{self.URL}/{_subject}/'
         if requester:
             url_requester = url+f'?requester={requester}'
-            response_check = self.session.get(url_requester, data=data, allow_redirects=False)
+            response_check = self.session.get(
+                url_requester, data=data, allow_redirects=False)
             if response_check.status_code == 403:
                 raise PermissionError
         response = self.session.post(url, data=data, allow_redirects=False)
@@ -98,9 +99,9 @@ class Database:
             pass
         return response
 
-    def edit_put(self, subject, object, requester = None, **data) -> dict:
+    def edit_put(self, subject, object, requester=None, **data) -> dict:
         """For operations with ManyToMany, as patch cannot set None for them
-        
+
         requester is Telegram user_id of user requesting the action.
         If provided, requester permissions will be checked. 
         If not enough permissions, raises exception, unless otherwise specified."""
@@ -115,7 +116,7 @@ class Database:
         response = response.json()
         return response
 
-    def edit_patch(self, subject, id, requester = None, **data) -> dict:
+    def edit_patch(self, subject, id, requester=None, **data) -> dict:
         """For anything except ManyToMany.
 
         Examples:
@@ -125,7 +126,7 @@ class Database:
         >>> data = {name: "abc"..}
 
         >>> db.edit_patch(db.PROFILES, id, **data)
-        
+
         requester is Telegram user_id of user requesting the action.
         If provided, requester permissions will be checked.
         If not enough permissions, raises exception, unless otherwise specified.
@@ -139,12 +140,12 @@ class Database:
         response = response.json()
         return response
 
-    def delete(self, subject, id, requester = None, raise_error = True) -> dict:
+    def delete(self, subject, id, requester=None, raise_error=True) -> dict:
         """ Delete entity
 
         requester is Telegram user_id of user requesting the action.
         If provided, requester permissions will be checked.
-        
+
         raise_error to specify if exception should be raised 
         in case of lack of permissions, True by default.
         """
@@ -156,7 +157,7 @@ class Database:
             raise PermissionError
         return response
 
-    def filter(self, _subject, return_list = False, **conditions) -> list[dict] | dict:
+    def filter(self, _subject, return_list=False, **conditions) -> list[dict] | dict:
         """usage:
         >>> db.filter('profiles',phone_number='+77479309084')"""
         url = f'{self.URL}/{_subject}/?'

@@ -1,11 +1,9 @@
-import re
 
-from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
-                           KeyboardButton, ReplyKeyboardMarkup)
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.data import callbacks as cb
-from app.data.constants import *
-from app.data.states import *
+from app.data.constants import DELETE, EDIT, INVENTORY, VIEW
+from app.data.states import Inventory, Menu
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
@@ -62,12 +60,5 @@ def kb_view_inventory(master, department):
             data=department
         )
     ))
-    # keyboard.add(InlineKeyboardButton(
-    #     'Export', callback_data=cb.generic.new(
-    #         state=Inventory.View.EXPORT,
-    #         action=Inventory.View.EXPORT,
-    #         data=department
-    #     )
-    # ))
 
     return keyboard

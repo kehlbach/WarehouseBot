@@ -5,12 +5,10 @@ import phonenumbers
 from aiogram import Dispatcher, executor, types
 from pyngrok import ngrok
 
-from app.data.constants import ALL_ACTIONS, ALL_SUBJECTS
 from app.loader import bot, db, dp
 from app.utils.config import (ADMIN_NUMBER, COUNTRY_CODE, NGROK, SERVERLESS,
                               WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_HOST,
                               WEBHOOK_PATH)
-from app.utils.processors import number_preprocessor
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,7 +38,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
             parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
     except phonenumbers.NumberParseException:
         logging.error('🔴 Admin phone number is incorrect.')
-    
+
     no_permissions = db.filter(db.ROLES, name='No permissions')
     if not no_permissions:
         db.add(db.ROLES, name='No permissions')
@@ -51,16 +49,15 @@ async def on_startup(dispatcher: Dispatcher) -> None:
         for subject in db.get(db.SUBJECTS).keys():
             for action in db.get(db.ACTIONS).keys():
                 db.add(db.ROLE_PERMISSIONS, role=admin_role['id'], subject=subject,
-                                action=action)
+                       action=action)
     admin = db.filter(db.PROFILES, phone_number=formatted_number)
     if not admin:
-        
+
         db.add(db.PROFILES,
-              phone_number=formatted_number,
-              role=admin_role['id'],
-              user_id=formatted_number)
-    
-    
+               phone_number=formatted_number,
+               role=admin_role['id'],
+               user_id=formatted_number)
+
     await dispatcher.bot.set_my_commands([types.BotCommand(command="/start", description="Start the bot")])
 
 

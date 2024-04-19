@@ -1,17 +1,11 @@
-import logging
 import re
-from datetime import datetime
-from json import loads
 
 from aiogram.dispatcher import FSMContext
-from aiogram.types import (CallbackQuery, InlineKeyboardButton, InputFile,
-                           Message)
+from aiogram.types import CallbackQuery, InputFile, Message
 
-# from app.keyboards import *
-from app import keyboards as kb
 from app.data import callbacks as cb
-from app.data.constants import DELETE, EDIT, RECEIPTS, VIEW
 from app.data.states import Inventory
+from app.keyboards.inventory import kb_view_inventory
 from app.loader import bot, db, dp
 from app.utils import tools
 
@@ -25,15 +19,18 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
         text = 'Department: {}\nInventory'.format(department["repr"])
         data = db.filter(db.INVENTORY_SUMMARY, department=department['id'])
         headers = ["Product", "Quantity", "Unit"]
-        rows = [[d["product_name"], d["quantity"], d['product_units']] for d in data]
+        rows = [[d["product_name"], d["quantity"], d['product_units']]
+                for d in data]
     else:
         text = 'All departments\nInventory'
         data = db.filter(db.INVENTORY_SUMMARY)
-        headers = ['Department',"Product", "Quantity", "Unit"]
-        rows = [[d['department_name'],d["product_name"], d["quantity"], d['product_units']] for d in data]
+        headers = ['Department', "Product", "Quantity", "Unit"]
+        rows = [[d['department_name'], d["product_name"],
+                 d["quantity"], d['product_units']] for d in data]
     if data:
         image_buffer = tools.generate_png(headers, rows)
-        reply_markup = kb.kb_view_inventory(master, department=callback_data['data'])
+        reply_markup = kb_view_inventory(
+            master, department=callback_data['data'])
         try:
             await bot.delete_message(
                 chat_id=callback_query.message.chat.id,
@@ -46,7 +43,8 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
                 reply_markup=reply_markup)
     else:
         text = "Inventory is empty"
-        keyboard = kb.kb_view_inventory(master, department=callback_data['data'])
+        keyboard = kb_view_inventory(
+            master, department=callback_data['data'])
         try:
             await bot.edit_message_text(
                 chat_id=callback_query.message.chat.id,
@@ -63,6 +61,7 @@ async def view_by_department(callback_query: CallbackQuery, callback_data: dict,
                     text=text,
                     reply_markup=keyboard)
 
+
 @dp.callback_query_handler(cb.generic.filter(state=Inventory.View.BY_DATE), state='*')
 async def ask_date(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     user_id = callback_query['from']['id']
@@ -70,6 +69,7 @@ async def ask_date(callback_query: CallbackQuery, callback_data: dict, state: FS
     await Inventory.View.Date.set()
     await state.set_data({'department': callback_data['data']})
     return await callback_query.message.answer('Enter date in YYYY-MM-DD format')
+
 
 @dp.message_handler(state=Inventory.View.Date)
 async def view_by_date(message: Message, state: FSMContext):
@@ -81,16 +81,20 @@ async def view_by_date(message: Message, state: FSMContext):
     department_id = data['department']
     if department_id:  # specific department
         department = db.get(db.DEPARTMENTS, department_id)
-        text = 'Department: {}\nInventory\nDate - {}'.format(department['repr'], message.text)
-        data = db.filter(db.INVENTORY_SUMMARY, department=department['id'], date=message.text)
+        text = 'Department: {}\nInventory\nDate - {}'.format(
+            department['repr'], message.text)
+        data = db.filter(db.INVENTORY_SUMMARY,
+                         department=department['id'], date=message.text)
         headers = ["Product", "Quantity", "Unit"]
-        rows = [[d["product_name"], d["quantity"], d['product_units']] for d in data]
+        rows = [[d["product_name"], d["quantity"], d['product_units']]
+                for d in data]
     else:
         text = 'All departments\nInventory'
         data = db.filter(db.INVENTORY_SUMMARY, date=message.text)
-        headers = ['Department',"Product", "Quantity", "Unit"]
-        rows = [[d['department_name'],d["product_name"], d["quantity"], d['product_units']] for d in data]
-    reply_markup = kb.kb_view_inventory(master, department=department_id)
+        headers = ['Department', "Product", "Quantity", "Unit"]
+        rows = [[d['department_name'], d["product_name"],
+                 d["quantity"], d['product_units']] for d in data]
+    reply_markup = kb_view_inventory(master, department=department_id)
     if data:
         image_buffer = tools.generate_png(headers, rows)
         return await bot.send_photo(

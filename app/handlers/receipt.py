@@ -1,15 +1,16 @@
 import logging
-from datetime import datetime
 from json import loads
 
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
 
-# from app.keyboards import *
-from app import keyboards as kb
 from app.data import callbacks as cb
 from app.data.constants import DELETE, EDIT, RECEIPTS, VIEW
 from app.data.states import Receipt
+from app.keyboards.menu import get_back, kb_skip
+from app.keyboards.receipt import (get_receipts, kb_add_product,
+                                   kb_back_to_receipts, kb_edit_receipt,
+                                   kb_get_create_department, kb_get_types)
 from app.loader import bot, db, dp
 from app.utils import tools
 
@@ -24,15 +25,15 @@ async def work_on_receipts(callback_query: CallbackQuery, callback_data: dict, s
                                     allowed_to=master['id'])
         dep = db.get(db.DEPARTMENTS, callback_data['data'])
         text = 'Department: {}\nSelect receipt'.format(dep['repr'])
-        reply_markup = kb.get_receipts(master, receipts_page, callback_data.get('page', 1),
-                                       department=callback_data['data'])
+        reply_markup = get_receipts(master, receipts_page, callback_data.get('page', 1),
+                                    department=callback_data['data'])
     else:  # All available departments
         receipts_page = db.get_page(db.RECEIPTS,
                                     callback_data.get('page', 1),
                                     allowed_to=master['id'])
         text = 'Receipts for all departments\nSelect receipt'
-        reply_markup = kb.get_receipts(master, receipts_page, callback_data.get('page', 1),
-                                       department=callback_data['data'])
+        reply_markup = get_receipts(master, receipts_page, callback_data.get('page', 1),
+                                    department=callback_data['data'])
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,
@@ -68,7 +69,8 @@ async def edit_receipt(callback_query: CallbackQuery, callback_data: dict, state
         text += '\nProducts:'
         for each in products:
             text += f'\n    {each["product_name"]}: {each["quantity"]} {each["product_units"]}'
-        reply_markup = kb.kb_edit_receipt(master, receipt=receipt, department=department_id)
+        reply_markup = kb_edit_receipt(
+            master, receipt=receipt, department=department_id)
     else:
         text = 'No access'
         reply_markup = None
@@ -80,7 +82,6 @@ async def edit_receipt(callback_query: CallbackQuery, callback_data: dict, state
     )
 
 
-
 @dp.callback_query_handler(cb.generic.filter(state=Receipt.Create.INIT), state='*')
 async def create_receipt_type(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     action = callback_data['action']
@@ -90,7 +91,7 @@ async def create_receipt_type(callback_query: CallbackQuery, callback_data: dict
         return await callback_query.answer('Can\'t create receipt if no departments available')
     page = callback_data.get('page', 1)
     text = 'Choose receipt type'
-    reply_markup = kb.kb_get_types()
+    reply_markup = kb_get_types()
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
@@ -108,8 +109,10 @@ async def create_receipt_type(callback_query: CallbackQuery, callback_data: dict
     receipt = db.add(db.RECEIPTS,
                      made_by=master['id'],
                      requester=callback_query.message.chat.id)
-    departments_page = db.get_page(db.DEPARTMENTS, page, allowed_to=master['id'])
-    reply_markup = kb.kb_get_create_department(master, departments_page, action, page, receipt_id=receipt['id'])
+    departments_page = db.get_page(
+        db.DEPARTMENTS, page, allowed_to=master['id'])
+    reply_markup = kb_get_create_department(
+        master, departments_page, action, page, receipt_id=receipt['id'])
     match action:
         case Receipt.Create.FROM_DEP:
             text = 'Select department from which products are received'
@@ -134,8 +137,10 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
     if action != Receipt.Create.DEPARTMENT:
         department_id = callback_data['department_id']
         if action in (Receipt.Create.FROM_DEP, Receipt.Create.FROM_DEP_ONLY):
-            departments_summary = db.filter(db.INVENTORY_SUMMARY, department=department_id, return_list=True)
-            non_empty_departments = set([d['department'] for d in departments_summary if d['quantity'] > 0])
+            departments_summary = db.filter(
+                db.INVENTORY_SUMMARY, department=department_id, return_list=True)
+            non_empty_departments = set(
+                [d['department'] for d in departments_summary if d['quantity'] > 0])
             if int(department_id) not in non_empty_departments:
                 return await callback_query.answer('There are no products in this department')
     match action:
@@ -145,18 +150,22 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             receipt = db.get(db.RECEIPTS, receipt_id)
             if receipt['from_department']:
                 dep_id = receipt['from_department']
-                remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
+                remainings = db.filter(
+                    db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
+                reply_markup = kb_add_product(
+                    master, products_page, receipt_id, 1, remainings)
             else:
-                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
+                reply_markup = kb_add_product(
+                    master, products_page, receipt_id, 1)
         case Receipt.Create.FROM_DEP:
             text = 'Receipt of goods\nSelect department from which products are received on the receipt'
             changed_receipt = db.edit_patch(db.RECEIPTS,
                                             receipt_id,
                                             from_department=department_id,
                                             requester=callback_query.message.chat.id)
-            departments_page = db.get_page(db.DEPARTMENTS, 1, allowed_to=master['id'])
-            reply_markup = kb.kb_get_create_department(
+            departments_page = db.get_page(
+                db.DEPARTMENTS, 1, allowed_to=master['id'])
+            reply_markup = kb_get_create_department(
                 master, departments_page, Receipt.Create.TO_DEP, 1, receipt_id=receipt_id)
         case Receipt.Create.FROM_DEP_ONLY:
             text = 'Select product to add to receipt'
@@ -166,10 +175,13 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             products_page = db.get_page(db.PRODUCTS)
             if changed_receipt['from_department']:
                 dep_id = changed_receipt['from_department']
-                remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
+                remainings = db.filter(
+                    db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
+                reply_markup = kb_add_product(
+                    master, products_page, receipt_id, 1, remainings)
             else:
-                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
+                reply_markup = kb_add_product(
+                    master, products_page, receipt_id, 1)
         case Receipt.Create.TO_DEP:
             text = 'Select product to add to receipt'
             receipt = db.get(db.RECEIPTS, receipt_id)
@@ -181,10 +193,13 @@ async def create_department(callback_query: CallbackQuery, callback_data: dict, 
             products_page = db.get_page(db.PRODUCTS)
             if changed_receipt['from_department']:
                 dep_id = changed_receipt['from_department']
-                remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
+                remainings = db.filter(
+                    db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
+                reply_markup = kb_add_product(
+                    master, products_page, receipt_id, 1, remainings)
             else:
-                reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
+                reply_markup = kb_add_product(
+                    master, products_page, receipt_id, 1)
 
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
@@ -207,7 +222,7 @@ async def handler_create_product(callback_query: CallbackQuery, callback_data: d
                 return await callback_query.answer('Add products first')
             else:
                 text = 'Enter receipt\'s note'
-                reply_markup = kb.kb_skip
+                reply_markup = kb_skip
                 await Receipt.Create.note.set()
                 async with state.proxy() as data:
                     data['receipt_id'] = receipt_id
@@ -230,10 +245,12 @@ async def handler_create_product(callback_query: CallbackQuery, callback_data: d
                 data['product_id'] = product_id
                 if len(callback_data['data']) > 2:
                     available = callback_data['data'][2]
-                    rp = db.filter(db.RECEIPT_PRODUCTS, receipt=receipt_id, product=product_id)
+                    rp = db.filter(db.RECEIPT_PRODUCTS,
+                                   receipt=receipt_id, product=product_id)
                     quantity = rp['quantity'] if rp else 0
                     data['available'] = int(available)
-                    text = text.replace('\n', '\nAvailable: {}\n'.format(available+quantity))
+                    text = text.replace(
+                        '\n', '\nAvailable: {}\n'.format(available+quantity))
             reply_markup = None
             return await bot.edit_message_text(
                 chat_id=callback_query.from_user.id,
@@ -255,7 +272,8 @@ async def create_product_quantity(message: Message, state: FSMContext):
     if quantity.isdigit():
         quantity = int(quantity)
         if quantity != 0:
-            rp = db.filter(db.RECEIPT_PRODUCTS, receipt=receipt_id, product=product_id)
+            rp = db.filter(db.RECEIPT_PRODUCTS,
+                           receipt=receipt_id, product=product_id)
             quantity_old = rp['quantity'] if rp else 0
             if 'available' in data and data['available']+quantity_old >= quantity or not ('available' in data):
                 receipt_product = db.add(db.RECEIPT_PRODUCTS,
@@ -265,32 +283,40 @@ async def create_product_quantity(message: Message, state: FSMContext):
                                          requester=message.chat.id)
                 if 'non_field_errors' in receipt_product:
                     if receipt_product['non_field_errors'][0] == 'The fields receipt, product, price must make a unique set.':
-                        db.delete(db.RECEIPT_PRODUCTS, id=rp['id'], requester=message.chat.id)
+                        db.delete(db.RECEIPT_PRODUCTS,
+                                  id=rp['id'], requester=message.chat.id)
                         receipt_product = db.add(db.RECEIPT_PRODUCTS,
                                                  receipt=receipt_id,
                                                  product=product_id,
                                                  quantity=quantity+quantity_old,
                                                  requester=message.chat.id)
-                        text = 'Product data for "{}" was corrected'.format(receipt_product['product_name'])
+                        text = 'Product data for "{}" was corrected'.format(
+                            receipt_product['product_name'])
                 else:
-                    text = 'Product "{}" added to receipt'.format(receipt_product['product_name'])
+                    text = 'Product "{}" added to receipt'.format(
+                        receipt_product['product_name'])
             else:
                 text = 'Not enough products in stock'
         else:
             text = 'Adding product cancelled'
         text += '\nSelect product to add to receipt'
-        rps = db.filter(db.RECEIPT_PRODUCTS, receipt=receipt_id, return_list=True)
+        rps = db.filter(db.RECEIPT_PRODUCTS,
+                        receipt=receipt_id, return_list=True)
         text += '\nAdded:'
         for rp in rps:
-            text += '\n{}: {} {}'.format(rp['product_name'], rp['quantity'], rp['product_units'])
+            text += '\n{}: {} {}'.format(rp['product_name'],
+                                         rp['quantity'], rp['product_units'])
         products_page = db.get_page(db.PRODUCTS)
         receipt = db.get(db.RECEIPTS, id=receipt_id)
         if receipt['from_department']:
             dep_id = receipt['from_department']
-            remainings = db.filter(db.INVENTORY_SUMMARY, department=dep_id, return_list=True)
-            reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1, remainings)
+            remainings = db.filter(db.INVENTORY_SUMMARY,
+                                   department=dep_id, return_list=True)
+            reply_markup = kb_add_product(
+                master, products_page, receipt_id, 1, remainings)
         else:
-            reply_markup = kb.kb_add_product(master, products_page, receipt_id, 1)
+            reply_markup = kb_add_product(
+                master, products_page, receipt_id, 1)
         return await message.answer(text=text, reply_markup=reply_markup)
     else:
         return await message.answer('Enter a number\n If product was selected incorrectly, enter 0')
@@ -305,7 +331,7 @@ async def create_note(message: Message, state: FSMContext):
     receipt = db.get(db.RECEIPTS, id=receipt_id)
     department = receipt['to_department'] if receipt['to_department'] else receipt['from_department']
     text = "Receipt created"
-    reply_markup = kb.kb_back_to_receipts(master, receipt_id, department)
+    reply_markup = kb_back_to_receipts(master, receipt_id, department)
     if message.text != 'Skip':
         db.edit_patch(
             db.RECEIPTS,
@@ -321,7 +347,8 @@ async def delete_receipt(callback_query: CallbackQuery, callback_data: dict, sta
     products = [products] if not isinstance(products, list) else products
     text = ''
     for each in products:
-        local_response = db.delete(db.RECEIPT_PRODUCTS, id=each['id'], requester=callback_query.message.chat.id)
+        local_response = db.delete(
+            db.RECEIPT_PRODUCTS, id=each['id'], requester=callback_query.message.chat.id)
         try:
             if local_response.json()['error'][0] == "Can't delete non-latest Receipt Product":
                 text = 'Can\'t delete receipt that is not latest and contains products'
@@ -340,7 +367,7 @@ async def delete_receipt(callback_query: CallbackQuery, callback_data: dict, sta
         else:
             logging.error('⭕Error during deleting receipt')
             text = 'Error during deleting receipt'
-    reply_markup = kb.get_back(RECEIPTS)
+    reply_markup = get_back(RECEIPTS)
     cb_add_data = {
         'state': Receipt.Create.INIT,
         'action': Receipt.Create.INIT,

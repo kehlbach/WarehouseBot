@@ -9,13 +9,13 @@ from app.data.constants import (CATEGORIES, DEPARTMENTS, PRODUCTS, PROFILES,
                                 RECEIPTS, ROLES)
 from app.data.states import (Category, Department, Generic, Product, Receipt,
                              Role, User)
-from app.keyboards import get_back, kb_skip
 from app.keyboards.department import edit_department_location
+from app.keyboards.menu import get_back, kb_skip
 from app.keyboards.product import get_product_categories, kb_get_units
 from app.keyboards.role import get_role_permissions
 from app.keyboards.user import get_user_roles
 from app.loader import db, dp
-from app.utils.processors import *
+from app.utils.processors import name_validator, number_preprocessor
 
 
 @dp.callback_query_handler(cb.generic.filter(state=Generic.CALLBACK_TO_MESSAGE_INIT), state='*')
@@ -92,7 +92,8 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         User.Edit.NUMBER: lambda: number_preprocessor(message, data['source_number']),
         User.Create.NUMBER: lambda: number_preprocessor(message),
         User.Edit.NUMBER_OWN: lambda: number_preprocessor(message, data['source_number']),
-        Department.Edit.LOCATION: lambda: ('', True, '') if message.text == 'Remove location' else (message.text, True, '')
+        Department.Edit.LOCATION: lambda: (
+            '', True, '') if message.text == 'Remove location' else (message.text, True, '')
 
     }
     get_db_condition = {
@@ -275,10 +276,11 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         Product.Edit.NAME: lambda: get_back(PRODUCTS, data['product_id']),
         Product.Edit.VENDOR_CODE: lambda: get_back(PRODUCTS, data['product_id']),
         Product.Edit.UNIT: lambda: get_back(PRODUCTS, data['product_id']),
-        Receipt.Edit.NOTE: lambda: get_back(RECEIPTS, [db_response['to_department'],data['receipt_id']]),
+        Receipt.Edit.NOTE: lambda: get_back(RECEIPTS, [db_response['to_department'], data['receipt_id']]),
     }
 
-    process_input = get_data_processor.get(action, lambda: (message.text, True, ''))
+    process_input = get_data_processor.get(
+        action, lambda: (message.text, True, ''))
     processed_data, is_valid, error_text = process_input()
 
     if not is_valid:

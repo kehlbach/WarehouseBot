@@ -1,16 +1,17 @@
 
+import logging
+
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 
 from app.data import callbacks as cb
-from app.data.constants import *
 from app.data.constants import DELETE, EDIT, PROFILES, VIEW
 from app.data.states import User
-from app.keyboards import (btn_add_user, edit_user, get_back,
-                           get_user_departments, get_user_roles)
+from app.keyboards.menu import get_back
+from app.keyboards.user import (btn_add_user, edit_user, get_user_departments,
+                                get_user_roles)
 from app.loader import bot, db, dp
 from app.utils import tools
-from app.utils.processors import *
 
 
 @dp.callback_query_handler(cb.user_departments.filter(
@@ -77,9 +78,11 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
             text = 'Choose departments user can work with:'
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             if int(callback_data['department_id']) in profile['departments']:
-                profile['departments'].remove(int(callback_data['department_id']))
+                profile['departments'].remove(
+                    int(callback_data['department_id']))
             else:
-                profile['departments'].append(int(callback_data['department_id']))
+                profile['departments'].append(
+                    int(callback_data['department_id']))
             profile = db.edit_put(
                 db.PROFILES,
                 profile,
@@ -108,7 +111,6 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
     )
 
 
-
 @dp.callback_query_handler(cb.user_role.filter(
     action=(
         User.Edit.Roles.MENU,
@@ -126,7 +128,8 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
         case User.Create.Roles.MENU:
             text = 'Choose user role:'
             roles_page = db.get_page(db.ROLES, page)
-            reply_markup = get_user_roles(User.Create.Roles, page, callback_data['profile_id'], roles_page)
+            reply_markup = get_user_roles(
+                User.Create.Roles, page, callback_data['profile_id'], roles_page)
         case User.Edit.Roles.MENU:
             text = 'Choose user role:'
             roles_page = db.get_page(db.ROLES, page)
@@ -163,7 +166,6 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
         text=text,
         reply_markup=reply_markup
     )
-
 
 
 @dp.callback_query_handler(cb.generic.filter(action=(User.Edit.DELETE)), state='*')

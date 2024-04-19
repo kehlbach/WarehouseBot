@@ -1,15 +1,16 @@
 
+import logging
+
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 
 from app.data import callbacks as cb
-from app.data.constants import DELETE, EDIT, VIEW
-from app.keyboards import *
+from app.data.constants import DELETE, EDIT, PRODUCTS, VIEW
+from app.data.states import Product
+from app.keyboards.menu import get_back
+from app.keyboards.product import edit_product, get_product_categories
 from app.loader import bot, db, dp
 from app.utils import tools
-from app.utils.processors import *
-
-"""create edit_product_init"""
 
 
 @dp.callback_query_handler(cb.generic.filter(state=Product.Edit.MENU), state='*')
@@ -73,7 +74,8 @@ async def handle_product_edit_category(callback_query: CallbackQuery, callback_d
                 id=callback_data['product_id'],
                 category=callback_data['category_id'],
                 requester=callback_query.message.chat.id)
-            text = 'Category successfully changed to {}'.format(changed_product['category_name'])
+            text = 'Category successfully changed to {}'.format(
+                changed_product['category_name'])
             reply_markup = get_back(PRODUCTS, callback_data['product_id'])
 
     return await bot.edit_message_text(

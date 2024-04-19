@@ -1,15 +1,16 @@
 
+import logging
+
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
 
 from app.data import callbacks as cb
-from app.data.constants import *
-from app.data.constants import DELETE, EDIT, VIEW
+from app.data.constants import DELETE, DEPARTMENTS, EDIT, VIEW
 from app.data.states import Department
-from app.keyboards import edit_department, get_back
+from app.keyboards.department import edit_department
+from app.keyboards.menu import get_back
 from app.loader import bot, db, dp
 from app.utils import tools
-from app.utils.processors import *
 
 
 @dp.callback_query_handler(cb.generic.filter(state=Department.Edit.MENU), state='*')
@@ -38,14 +39,14 @@ async def edit_department_init(callback_query: CallbackQuery, callback_data: dic
 async def handle_department_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     department_id = callback_data['data']
     response = db.delete(
-        db.DEPARTMENTS, 
+        db.DEPARTMENTS,
         id=department_id,
         requester=callback_query.message.chat.id,
         raise_error=False)
     reply_markup = get_back(DEPARTMENTS)
     if response.status_code == 204:
         text = 'Department successfully deleted.'
-    elif response.status_code==403:
+    elif response.status_code == 403:
         text = 'Not enough permissions to delete department.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(DEPARTMENTS, department_id)

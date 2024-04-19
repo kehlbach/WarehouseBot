@@ -4,8 +4,11 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup)
 
 from app.data import callbacks as cb
-from app.data.constants import *
-from app.data.states import *
+from app.data.constants import (ALL_SUBJECTS, CATEGORIES, DEPARTMENTS,
+                                INVENTORY, PRODUCTS, PROFILES, RECEIPTS, ROLES,
+                                subjects)
+from app.data.states import (CURRENT_PAGE, Category, Department, Login, Menu,
+                             Product, Receipt, Role, User)
 from app.utils import tools
 
 kb_check_status = InlineKeyboardMarkup()
@@ -34,8 +37,6 @@ def get_back(subject='', data=''):
         case subjects.INVENTORY:
             to_first_menu_text = 'To inventory selection'
             to_first_menu_action = Menu.INVENTORY
-            # subject_text = ['To list of receipts']
-            # subject_action = [Inventory.View.DEPARTMENT]
         case subjects.RECEIPTS:
             to_first_menu_text = 'To receipts department selection'
             to_first_menu_action = Menu.RECEIPTS
@@ -97,14 +98,6 @@ kb_skip = ReplyKeyboardMarkup(
     resize_keyboard=True, selective=True, one_time_keyboard=True)
 kb_skip.add(KeyboardButton(
     text="Skip"))
-
-
-KB_MAIN_MENU = '1'
-KB_SUBJECT_ENTITIES = '2'
-KB_USER_ROLES = '3'
-KB_USER_DEPARTMENTS = '4'
-KB_EDIT_USER = '5'
-DONE = 'D'
 
 
 def _get_pages(response, cb_type, cb_data):

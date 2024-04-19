@@ -1,20 +1,12 @@
 from json import dumps
 
-from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
-                           KeyboardButton, ReplyKeyboardMarkup)
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.data import callbacks as cb
 from app.data.constants import ADD, DELETE, EDIT, RECEIPTS, VIEW
 from app.data.states import Generic, Menu, Receipt
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
-
-# kb_product_abort = InlineKeyboardMarkup()
-# kb_product_abort.add( InlineKeyboardButton(
-#     'Cancel operation', callback_data=cb.generic.new(
-#         state=
-#     )
-# ))
 
 
 def kb_back_to_receipts(master, receipt_id, department):
@@ -111,28 +103,6 @@ def get_receipts(master: dict, receipts_page: dict, page: int, department) -> In
         ),
     )
 
-    # if ADD in permissions[RECEIPTS]:
-    #     cb_add_data = {
-    #         'state': Generic.CALLBACK_TO_MESSAGE_INIT,
-    #         'action': Receipt.Create.TYPE,
-    #         'data': '',
-    #     }
-    #     keyboard.add(InlineKeyboardButton(
-    #         'Add Receipt', callback_data=cb.generic.new(**cb_add_data)))
-
-    # back to department choice:
-
-    # keyboard.add(
-    #     InlineKeyboardButton(
-    #         'Back to receipt choice',
-    #         callback_data=cb.menu_item.new(
-    #             state=Menu.CHOICE,
-    #             action=Menu.RECEIPTS,
-    #             page=1,
-    #         )
-    #     )
-    # )
-
     if set([VIEW, EDIT, DELETE]).intersection(permissions[RECEIPTS]):
         cb_edit_data = {
             'state': Receipt.Edit.MENU,
@@ -190,7 +160,6 @@ def kb_edit_receipt(master, receipt, department=''):
 
 def kb_get_types():
     keyboard = InlineKeyboardMarkup()
-    # Add buttons for Приходная, Перемещение, Расходная
     keyboard.add(
         InlineKeyboardButton(
             'Cancel',

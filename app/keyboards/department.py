@@ -4,14 +4,13 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup)
 
 from app.data import callbacks as cb
-from app.data.constants import *
-from app.data.constants import ADD, DELETE, EDIT, VIEW
-from app.data.states import *
+from app.data.constants import ADD, DELETE, DEPARTMENTS, EDIT, VIEW
 from app.data.states import Department, Generic, Menu
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
-edit_department_location = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+edit_department_location = ReplyKeyboardMarkup(
+    resize_keyboard=True, one_time_keyboard=True)
 edit_department_location.add(KeyboardButton('Remove location'))
 
 

@@ -3,9 +3,8 @@ from json import dumps
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.data import callbacks as cb
-from app.data.constants import *
+from app.data.constants import PROFILES
 from app.data.constants import ADD, CATEGORIES, DELETE, EDIT, VIEW
-from app.data.states import *
 from app.data.states import Category, Generic, Menu
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
