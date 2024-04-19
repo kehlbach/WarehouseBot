@@ -46,8 +46,12 @@ async def edit_receipt(callback_query: CallbackQuery, callback_data: dict, state
     master = db.filter(db.PROFILES, user_id=user_id)
     permissions = tools.permissions(master)
     callback_data['data'] = loads(callback_data['data'])
-    department_id = callback_data['data'][0]
-    receipt_id = callback_data['data'][1]
+    if type(callback_data['data']) == list and len(callback_data['data']) == 2:
+        department_id = callback_data['data'][0]
+        receipt_id = callback_data['data'][1]
+    elif type(callback_data['data']) == int:
+        department_id = ''
+        receipt_id = callback_data['data']
     if set([VIEW, EDIT, DELETE]).intersection(permissions[RECEIPTS]):
         receipt = db.get(db.RECEIPTS, receipt_id)
         text = 'Накладная'
