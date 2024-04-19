@@ -41,9 +41,20 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     except phonenumbers.NumberParseException:
         logging.error('🔴 Admin phone number is incorrect.')
     
+    no_permissions = db.filter(db.ROLES, name='No permissions')
+    if not no_permissions:
+        db.add(db.ROLES, name='No permissions')
+    admin_role = db.filter(db.ROLES, name='Admin')
+    if not admin_role:
+        db.add(db.ROLES, name='Admin')
+        admin_role = db.filter(db.ROLES, name='Admin')
+        for subject in db.get(db.SUBJECTS).keys():
+            for action in db.get(db.ACTIONS).keys():
+                db.add(db.ROLE_PERMISSIONS, role=admin_role['id'], subject=subject,
+                                action=action)
     admin = db.filter(db.PROFILES, phone_number=formatted_number)
     if not admin:
-        admin_role = db.filter(db.ROLES, name='Администратор')
+        
         db.add(db.PROFILES,
               phone_number=formatted_number,
               role=admin_role['id'],
