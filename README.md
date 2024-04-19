@@ -44,4 +44,48 @@ Adding, moving, or removing products involves creating Receipts, specifying prod
 
 Entities can be added, modified, or deleted, except for Inventory, which is read-only. Deletion of entities is allowed only if entity is not in use.
 
-At the moment, bot only works in russian language.
+## Demo
+
+Every function represented by the buttons in the images is fully functional
+
+### Menu
+
+![](../assets/menu.jpg)
+
+### Role
+
+![](../assets/role1.jpg) 
+
+![](../assets/role2.jpg)
+
+### Inventory
+
+![](../assets/inventory1.jpg)
+
+![](../assets/inventory2.jpg)
+
+### Receipt
+
+![](../assets/receipt1.jpg)
+
+![](../assets/receipt2.jpg)
+
+![](../assets/receipt3.jpg)
+
+### Product
+
+![](../assets/product1.jpg)
+
+![](../assets/product2.jpg)
+
+### Category
+
+![](../assets/category1.jpg)
+
+![](../assets/category2.jpg)
+
+### Department
+
+![](../assets/department1.jpg)
+
+![](../assets/department2.jpg)
