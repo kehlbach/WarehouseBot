@@ -9,13 +9,13 @@ from app.data.states import Generic, Menu, Receipt
 from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
-
 # kb_product_abort = InlineKeyboardMarkup()
 # kb_product_abort.add( InlineKeyboardButton(
 #     'Отменить выбор товара', callback_data=cb.generic.new(
 #         state=
 #     )
 # ))
+
 
 def kb_back_to_receipts(master, receipt_id, department):
     keyboard = InlineKeyboardMarkup()
@@ -151,8 +151,11 @@ def get_receipts(master: dict, receipts_page: dict, page: int, department) -> In
     return keyboard
 
 
-def kb_edit_receipt(master, receipt, department):
-    keyboard = get_back(RECEIPTS, data=[department])
+def kb_edit_receipt(master, receipt, department=''):
+    if department:
+        keyboard = get_back(RECEIPTS, data=[department])
+    else:
+        keyboard = get_back(RECEIPTS)
     permissions = tools.permissions(master)
 
     cb_data = {'receipt_id': receipt['id']}
@@ -323,7 +326,8 @@ def kb_add_product(master, products_page, receipt_id, page, remainings=[]) -> In
         }
 
         if remainings:
-            remainings = {each['product']: each['quantity'] for each in remainings}
+            remainings = {each['product']: each['quantity']
+                          for each in remainings}
             for each in products_page['results']:
                 if each['id'] in remainings and remainings[each['id']]:
                     keyboard.add(InlineKeyboardButton(

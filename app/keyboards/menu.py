@@ -88,10 +88,12 @@ def get_back(subject='', data=''):
     return keyboard
 
 
-kb_send_number = ReplyKeyboardMarkup(resize_keyboard=True, selective=True, one_time_keyboard=True)
+kb_send_number = ReplyKeyboardMarkup(
+    resize_keyboard=True, selective=True, one_time_keyboard=True)
 kb_send_number.add(KeyboardButton(
     text="Отправить телефон", request_contact=True))
-kb_skip = ReplyKeyboardMarkup(resize_keyboard=True, selective=True, one_time_keyboard=True)
+kb_skip = ReplyKeyboardMarkup(
+    resize_keyboard=True, selective=True, one_time_keyboard=True)
 kb_skip.add(KeyboardButton(
     text="Пропустить"))
 
@@ -115,7 +117,8 @@ def _get_pages(response, cb_type, cb_data):
             else:
                 prev_page = 1
             cb_data['page'] = prev_page
-            page_row.append(InlineKeyboardButton('<', callback_data=cb_type.new(**cb_data)),)
+            page_row.append(InlineKeyboardButton(
+                '<', callback_data=cb_type.new(**cb_data)),)
         if response['next']:
             next_page = re.search(r'page=(\d+)', response['next']).group(1)
             cb_data['page'] = next_page
@@ -126,7 +129,8 @@ def _get_pages(response, cb_type, cb_data):
             }
             page_row.append(InlineKeyboardButton(
                 str(int(next_page)-1), callback_data=cb.menu_item.new(**cur_page_data)),)
-            page_row.append(InlineKeyboardButton('>', callback_data=cb_type.new(**cb_data)),)
+            page_row.append(InlineKeyboardButton(
+                '>', callback_data=cb_type.new(**cb_data)),)
         else:
             cur_page_data = {
                 'state': CURRENT_PAGE,

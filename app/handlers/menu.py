@@ -1,6 +1,7 @@
 
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery
+from aiogram.utils.exceptions import BadRequest
 
 from app import keyboards as kb
 from app.data import callbacks as cb
@@ -10,7 +11,7 @@ from app.keyboards import *
 from app.keyboards.category import get_categories
 from app.loader import bot, db, dp
 from app.utils import tools
-from aiogram.utils.exceptions import BadRequest
+
 from .login import _prepare_menu
 
 

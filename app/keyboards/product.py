@@ -105,10 +105,10 @@ def edit_product(master, product):
         keyboard.add(InlineKeyboardButton(
             'Изменить категорию',
             callback_data=cb.product_category.new(
-                state = Generic.CALLBACK_HANDLE,
-                action = Product.Edit.Category.MENU,
-                product_id = product_id,
-                category_id = '',
+                state=Generic.CALLBACK_HANDLE,
+                action=Product.Edit.Category.MENU,
+                product_id=product_id,
+                category_id='',
                 page=1
             )
         ))
@@ -126,6 +126,7 @@ def edit_product(master, product):
 
     return keyboard
 
+
 def get_product_categories(
     action_class: Product.Create.Category | Product.Edit.Category,
     page,
@@ -138,15 +139,15 @@ def get_product_categories(
         'state': Generic.CALLBACK_HANDLE,
         'page': page,
         'product_id': product_id}
-    
+
     page_row = _get_pages(
         categories_page,
         cb.product_category,
         dict(
-            action = action_class.MENU,
+            action=action_class.MENU,
             category_id='',
             **cb_data))
-    
+
     for each in categories_page['results']:
         keyboard.add(InlineKeyboardButton(
             each['repr'],
@@ -154,8 +155,8 @@ def get_product_categories(
                 action=action_class.SPECIFIC,
                 category_id=each['id'],
                 **cb_data)))
-        
+
     if page_row:
         keyboard.row(*page_row)
 
-    return keyboard 
+    return keyboard

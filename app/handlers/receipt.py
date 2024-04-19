@@ -1,12 +1,14 @@
+import logging
 from datetime import datetime
 from json import loads
+
 from aiogram.dispatcher import FSMContext
-from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
-import logging
-from app.data import callbacks as cb
-from app.data.constants import DELETE, EDIT, VIEW, RECEIPTS
+from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
+
 # from app.keyboards import *
 from app import keyboards as kb
+from app.data import callbacks as cb
+from app.data.constants import DELETE, EDIT, RECEIPTS, VIEW
 from app.data.states import Receipt
 from app.loader import bot, db, dp
 from app.utils import tools

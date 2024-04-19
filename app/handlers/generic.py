@@ -6,8 +6,9 @@ from aiogram.types import CallbackQuery
 
 from app.data import callbacks as cb
 from app.data.constants import (CATEGORIES, DEPARTMENTS, PRODUCTS, PROFILES,
-                                ROLES,RECEIPTS)
-from app.data.states import Category, Department, Generic, Product, Role, User, Receipt
+                                RECEIPTS, ROLES)
+from app.data.states import (Category, Department, Generic, Product, Receipt,
+                             Role, User)
 from app.keyboards import get_back, kb_skip
 from app.keyboards.department import edit_department_location
 from app.keyboards.product import get_product_categories, kb_get_units

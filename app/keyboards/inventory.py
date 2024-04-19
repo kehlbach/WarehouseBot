@@ -6,8 +6,8 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
 from app.data import callbacks as cb
 from app.data.constants import *
 from app.data.states import *
-from app.utils import tools
 from app.keyboards.menu import _get_pages, get_back
+from app.utils import tools
 
 
 def get_inventory_department(master: dict, departments_page: dict, page: int) -> InlineKeyboardMarkup:
@@ -68,8 +68,5 @@ def kb_view_inventory(master, department):
     #         data=department
     #     )
     # ))
-
-
-    
 
     return keyboard

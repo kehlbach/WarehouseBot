@@ -1,16 +1,20 @@
+import logging
+import re
 from datetime import datetime
 from json import loads
+
 from aiogram.dispatcher import FSMContext
-from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
-import logging, re
-from app.data import callbacks as cb
-from app.data.constants import DELETE, EDIT, VIEW, RECEIPTS
+from aiogram.types import (CallbackQuery, InlineKeyboardButton, InputFile,
+                           Message)
+
 # from app.keyboards import *
 from app import keyboards as kb
+from app.data import callbacks as cb
+from app.data.constants import DELETE, EDIT, RECEIPTS, VIEW
 from app.data.states import Inventory
 from app.loader import bot, db, dp
 from app.utils import tools
-from aiogram.types import InputFile
+
 
 @dp.callback_query_handler(cb.generic.filter(state=Inventory.View.DEPARTMENT), state='*')
 async def view_by_department(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):

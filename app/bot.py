@@ -1,15 +1,15 @@
 import logging
 from urllib.parse import urljoin
+
 import phonenumbers
-
-
 from aiogram import Dispatcher, executor, types
 from pyngrok import ngrok
 
-
-from app.utils.config import (NGROK, SERVERLESS, WEBAPP_HOST, WEBAPP_PORT,
-                              WEBHOOK_HOST, WEBHOOK_PATH, ADMIN_NUMBER, COUNTRY_CODE)
-from app.loader import bot, dp, db
+from app.data.constants import ALL_ACTIONS, ALL_SUBJECTS
+from app.loader import bot, db, dp
+from app.utils.config import (ADMIN_NUMBER, COUNTRY_CODE, NGROK, SERVERLESS,
+                              WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_HOST,
+                              WEBHOOK_PATH)
 from app.utils.processors import number_preprocessor
 
 logging.basicConfig(level=logging.INFO)
@@ -48,6 +48,7 @@ async def on_startup(dispatcher: Dispatcher) -> None:
               phone_number=formatted_number,
               role=admin_role['id'],
               user_id=formatted_number)
+    
     
     await dispatcher.bot.set_my_commands([types.BotCommand(command="/start", description="Start the bot")])
 

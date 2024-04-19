@@ -1,19 +1,18 @@
 import logging
 
+import requests.exceptions
+import urllib3.exceptions
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from aiogram.utils import exceptions
 
 from app.data.constants import *
 from app.data.states import *
 from app.keyboards import *
-from app.loader import dp, bot
+from app.loader import bot, dp
 from app.utils.processors import *
 
-import logging
-import requests.exceptions
-import urllib3.exceptions
-from aiogram.utils import exceptions
 
 @dp.message_handler(state='*', commands='cancel')
 @dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
@@ -54,7 +53,6 @@ async def general_error_handler(update: types.Update, exception: Exception):
                     )
                 except:
                     pass
-                #return await update.callback_query.answer('Недостаточно прав для выполнения данного действия')
             elif 'message' in update:
                 return await update.message.answer('Недостаточно прав для выполнения данного действия')
         case _:
