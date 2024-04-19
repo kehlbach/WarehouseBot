@@ -30,7 +30,7 @@ def get_roles(master: dict, roles_page: dict, page: int) -> InlineKeyboardMarkup
             'data': ''
         }
         keyboard.add(InlineKeyboardButton(
-            'Добавить роль', callback_data=cb.generic.new(**cb_add_data)))
+            'Add role', callback_data=cb.generic.new(**cb_add_data)))
     if set([VIEW, EDIT, DELETE]).intersection(permissions[ROLES]):
         cb_edit_data = {
             'state': Role.Edit.MENU,
@@ -56,7 +56,7 @@ def edit_role(master, role):
 
     if EDIT in permissions[ROLES]:
         keyboard.add(InlineKeyboardButton(
-            'Изменить название',
+            'Rename',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Role.Edit.NAME,
@@ -64,7 +64,7 @@ def edit_role(master, role):
             )
         ))
         keyboard.add(InlineKeyboardButton(
-            'Изменить разрешения',
+            'Change permissions',
             callback_data=cb.role_permissions.new(
                 state=Role.Edit.Permissions.MENU,
                 action=Role.Edit.Permissions.MENU,
@@ -77,7 +77,7 @@ def edit_role(master, role):
 
     if DELETE in permissions[ROLES]:
         keyboard.add(InlineKeyboardButton(
-            'Удалить роль',
+            'Delete role',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_HANDLE,
                 action=Role.Edit.DELETE,
@@ -96,7 +96,7 @@ def get_role_permissions(
     }
 
     keyboard.add(InlineKeyboardButton(
-        'Готово',
+        'Done',
         callback_data=cb.role_permissions.new(
             action=action_class.DONE,
             subject_id='',
@@ -134,7 +134,7 @@ def get_role_permission(action_class: Role.Edit.Permissions | Role.Create.Permis
     }
 
     keyboard.add(InlineKeyboardButton(
-        'Назад',
+        'Back',
         callback_data=cb.role_permissions.new(
             action=action_class.BACK,
             subject_id='',
@@ -149,7 +149,7 @@ def get_role_permission(action_class: Role.Edit.Permissions | Role.Create.Permis
     else:
         checked = '❌ '
     keyboard.add(InlineKeyboardButton(
-        checked+'Все разрешения',
+        checked+'All permissions',
         callback_data=cb.role_permissions.new(
                 action=action_class.ALL,
                 subject_id=subject_id,

@@ -17,7 +17,7 @@ def edit_category(master, category):
     cb_data = {'category_id': category['id']}
     if EDIT in permissions[CATEGORIES]:
         keyboard.add(InlineKeyboardButton(
-            'Изменить название',
+            'Rename',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Category.Edit.NAME,
@@ -26,7 +26,7 @@ def edit_category(master, category):
         ))
     if DELETE in permissions[PROFILES]:
         keyboard.add(InlineKeyboardButton(
-            'Удалить категорию',
+            'Delete category',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_HANDLE,
                 action=Category.Edit.DELETE,
@@ -45,7 +45,7 @@ def get_categories(master: dict, categories_page: dict, page: int) -> InlineKeyb
             action=Menu.CATEGORIES,
             page=page))
     keyboard.add(InlineKeyboardButton(
-        'В меню', callback_data=cb.action.new(action=Menu.INIT)))
+        'Back to menu', callback_data=cb.action.new(action=Menu.INIT)))
     if ADD in permissions[CATEGORIES]:
         cb_add_data = {
             'state': Generic.CALLBACK_TO_MESSAGE_INIT,
@@ -53,7 +53,7 @@ def get_categories(master: dict, categories_page: dict, page: int) -> InlineKeyb
             'data': ''
         }
         keyboard.add(InlineKeyboardButton(
-            'Добавить категорию', callback_data=cb.generic.new(**cb_add_data)))
+            'Add category', callback_data=cb.generic.new(**cb_add_data)))
     if set([VIEW, EDIT, DELETE]).intersection(permissions[CATEGORIES]):
         cb_edit_data = {
             'state': Category.Edit.MENU,

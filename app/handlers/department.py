@@ -20,8 +20,8 @@ async def edit_department_init(callback_query: CallbackQuery, callback_data: dic
     department_id = callback_data['data']
     if set([VIEW, EDIT, DELETE]).intersection(permissions[DEPARTMENTS]):
         department = db.get(db.DEPARTMENTS, department_id)
-        text = 'Отделение: ' + department['name'] +\
-               '\nАдрес: ' + department['location']
+        text = 'Department: ' + department['name'] +\
+               '\nLocation: ' + department['location']
         reply_markup = edit_department(
             master,
             department=department,
@@ -44,15 +44,15 @@ async def handle_department_delete(callback_query: CallbackQuery, callback_data:
         raise_error=False)
     reply_markup = get_back(DEPARTMENTS)
     if response.status_code == 204:
-        text = 'Отделение успешно удалено.'
+        text = 'Department successfully deleted.'
     elif response.status_code==403:
-        text = 'Нет прав на удаление отделения.'
+        text = 'Not enough permissions to delete department.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(DEPARTMENTS, department_id)
-        text = 'Нельзя удалить отделение, если в остатках в нем есть товары.'
+        text = 'Cannot delete department if there are products in it.'
     else:
-        text = 'Произошла ошибка при удалении отделения.'
-        logging.warning('⭕тут чет категория не удалилась')
+        text = 'An error occurred while deleting department.'
+        logging.warning('⭕Department was not deleted')
 
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,

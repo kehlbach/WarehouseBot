@@ -20,13 +20,13 @@ async def edit_product_init(callback_query: CallbackQuery, callback_data: dict, 
     product_id = callback_data['data']
     if set([VIEW, EDIT, DELETE]).intersection(permissions[PRODUCTS]):
         product = db.get(db.PRODUCTS, product_id)
-        text = 'Товар: ' + product['name']
-        text += '\nАртикул (код товара): '+product['vendor_code']
-        text += '\nКатегория: '+product['category_name']
-        text += '\nЕдиницы измерения: '+product['units']
+        text = 'Product: ' + product['name']
+        text += '\nVendor code (product code): '+product['vendor_code']
+        text += '\nCategory: '+product['category_name']
+        text += '\nUnits of measurement: '+product['units']
         reply_markup = edit_product(master, product=product)
     else:
-        text = 'Нет доступа'
+        text = 'No access'
         reply_markup = None
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
@@ -50,17 +50,17 @@ async def handle_product_edit_category(callback_query: CallbackQuery, callback_d
     page = callback_data.get('page', 1)
     match action:
         case Product.Create.Category.MENU:
-            text = 'Выберите категорию продукта:'
+            text = 'Select product category:'
             categories_page = db.get_page(db.CATEGORIES, page)
             reply_markup = get_product_categories(
                 Product.Create.Category, page, callback_data['product_id'], categories_page)
         case Product.Edit.Category.MENU:
-            text = 'Выберите категорию продукта:'
+            text = 'Select product category:'
             categories_page = db.get_page(db.CATEGORIES, page)
             reply_markup = get_product_categories(
                 Product.Edit.Category, page, callback_data['product_id'], categories_page)
         case Product.Create.Category.SPECIFIC:
-            text = 'Товар успешно создан'
+            text = 'Product successfully created'
             reply_markup = get_back(PRODUCTS, callback_data['product_id'])
             db.edit_patch(
                 db.PRODUCTS,
@@ -73,7 +73,7 @@ async def handle_product_edit_category(callback_query: CallbackQuery, callback_d
                 id=callback_data['product_id'],
                 category=callback_data['category_id'],
                 requester=callback_query.message.chat.id)
-            text = 'Категория успешно изменена на {}'.format(changed_product['category_name'])
+            text = 'Category successfully changed to {}'.format(changed_product['category_name'])
             reply_markup = get_back(PRODUCTS, callback_data['product_id'])
 
     return await bot.edit_message_text(
@@ -94,15 +94,15 @@ async def handle_product_delete(callback_query: CallbackQuery, callback_data: di
         raise_error=False)
     reply_markup = get_back(PRODUCTS)
     if response.status_code == 204:
-        text = 'Товар успешно удален.'
+        text = 'Product successfully deleted.'
     elif response.status_code == 403:
-        text = 'Нет прав на удаление товара.'
+        text = 'No permission to delete product.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(PRODUCTS, id=product_id)
-        text = 'Нельзя удалить товар, для которого заданы .'
+        text = 'Cannot delete product, that is in use.'
     else:
-        text = 'Произошла ошибка при удалении товара.'
-        logging.warning('⭕тут чет товар не удалился')
+        text = 'Error occurred while deleting product.'
+        logging.warning('⭕ Product not deleted')
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,
         message_id=callback_query.message.message_id,

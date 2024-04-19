@@ -12,7 +12,7 @@ from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
 edit_department_location = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-edit_department_location.add(KeyboardButton('Убрать адрес'))
+edit_department_location.add(KeyboardButton('Remove location'))
 
 
 def edit_department(master, department):
@@ -21,7 +21,7 @@ def edit_department(master, department):
     cb_data = {'department_id': department['id']}
     if EDIT in permissions[DEPARTMENTS]:
         keyboard.add(InlineKeyboardButton(
-            'Изменить название',
+            'Rename',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Department.Edit.NAME,
@@ -29,7 +29,7 @@ def edit_department(master, department):
             )
         ))
         keyboard.add(InlineKeyboardButton(
-            'Изменить адрес',
+            'Change location',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=Department.Edit.LOCATION,
@@ -38,7 +38,7 @@ def edit_department(master, department):
         ))
     if DELETE in permissions[DEPARTMENTS]:
         keyboard.add(InlineKeyboardButton(
-            'Удалить отделение',
+            'Delete department',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_HANDLE,
                 action=Department.Edit.DELETE,
@@ -65,7 +65,7 @@ def get_departments(master: dict, departments_page: dict, page: int) -> InlineKe
             'data': ''
         }
         keyboard.add(InlineKeyboardButton(
-            'Добавить отделение', callback_data=cb.generic.new(**cb_add_data)))
+            'Add department', callback_data=cb.generic.new(**cb_add_data)))
     if set([VIEW, EDIT, DELETE]).intersection(permissions[DEPARTMENTS]):
         cb_edit_data = {
             'state': Department.Edit.MENU,

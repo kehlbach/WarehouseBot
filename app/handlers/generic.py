@@ -24,24 +24,24 @@ async def generic_message_request(callback_query: CallbackQuery, callback_data: 
         callback_data['data'] = loads(callback_data['data'])
     action = callback_data['action']
     get_text = {
-        User.Edit.NAME: 'Введите ФИО. Пример:\n Иванов Иван Иванович',
-        User.Edit.NUMBER: 'Введите новый номер мобильного телефона:',
-        User.Create.NUMBER: 'Введите номер мобильного телефона пользователя:',
-        User.Edit.NUMBER_OWN: 'Введите новый номер мобильного телефона:',
-        Category.Create.NAME: 'Введите имя категории:',
-        Category.Edit.NAME: 'Введите имя категории:',
-        Department.Create.NAME: 'Введите название отделения:',
-        Department.Edit.NAME: 'Введите название отделения:',
-        Department.Edit.LOCATION: 'Введите адрес отделения:',
-        Role.Create.NAME: 'Введите название роли:',
-        Role.Edit.NAME: 'Введите название роли:',
-        Product.Create.VENDOR_CODE: 'Введите артикул (код товара):',
-        Product.Create.NAME: 'Введите наименование товара:',
-        Product.Create.UNIT: 'Введите единицу измерения:',
-        Product.Edit.NAME: 'Введите наименование товара:',
-        Product.Edit.UNIT: 'Введите или выберите единицу измерения:',
-        Product.Edit.VENDOR_CODE: 'Введите артикул (код товара):',
-        Receipt.Edit.NOTE: 'Введите примечание:',
+        User.Edit.NAME: 'Enter full name. Example:\n Ivanov Ivan Ivanovich',
+        User.Edit.NUMBER: 'Enter new phone number:',
+        User.Create.NUMBER: 'Enter phone number of user:',
+        User.Edit.NUMBER_OWN: 'Enter new phone number:',
+        Category.Create.NAME: 'Enter category name:',
+        Category.Edit.NAME: 'Enter category name:',
+        Department.Create.NAME: 'Enter department name:',
+        Department.Edit.NAME: 'Enter department name:',
+        Department.Edit.LOCATION: 'Enter department address:',
+        Role.Create.NAME: 'Enter role name:',
+        Role.Edit.NAME: 'Enter role name:',
+        Product.Create.VENDOR_CODE: 'Enter vendor code (product code):',
+        Product.Create.NAME: 'Enter product name:',
+        Product.Create.UNIT: 'Enter unit of measure:',
+        Product.Edit.NAME: 'Enter product name:',
+        Product.Edit.UNIT: 'Enter or select unit of measure:',
+        Product.Edit.VENDOR_CODE: 'Enter vendor code (product code):',
+        Receipt.Edit.NOTE: 'Enter note:',
     }
 
     get_reply_markup = {
@@ -92,11 +92,11 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         User.Edit.NUMBER: lambda: number_preprocessor(message, data['source_number']),
         User.Create.NUMBER: lambda: number_preprocessor(message),
         User.Edit.NUMBER_OWN: lambda: number_preprocessor(message, data['source_number']),
-        Department.Edit.LOCATION: lambda: ('', True, '') if message.text == 'Убрать адрес' else (message.text, True, '')
+        Department.Edit.LOCATION: lambda: ('', True, '') if message.text == 'Remove location' else (message.text, True, '')
 
     }
     get_db_condition = {
-        Department.Create.LOCATION: lambda: False if processed_data == 'Пропустить' else True,
+        Department.Create.LOCATION: lambda: False if processed_data == 'Skip' else True,
     }
 
     get_db_operation = {
@@ -115,7 +115,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
             db.PROFILES,
             requester=message.chat.id,
             phone_number=processed_data,
-            role=db.filter(db.ROLES, name='Без прав')['id'],
+            role=db.filter(db.ROLES, name='No permissions')['id'],
             user_id=processed_data
         ),
         User.Edit.NUMBER_OWN: lambda: db.edit_patch(
@@ -228,26 +228,26 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
     }
 
     get_text = {
-        User.Edit.NAME: lambda: 'Имя пользователя изменено на {}.'.format(db_response['name']),
-        User.Create.NUMBER: lambda: 'Выберите роль пользователя:',
-        User.Edit.NUMBER: lambda: 'Номер изменен на {}.'.format(db_response['phone_number']),
-        User.Edit.NUMBER_OWN: lambda: 'Номер изменен на {}.'.format(db_response['phone_number']) +
-        '\nТеперь вы можете войти с другого аккаунта Telegram.',
-        Category.Create.NAME: lambda: 'Категория "{}" создана.'.format(db_response['name']),
-        Category.Edit.NAME: lambda: 'Название категории изменено на "{}".'.format(db_response['name']),
-        Department.Create.NAME: lambda: 'Введите адрес отделения:',
-        Department.Create.LOCATION: lambda: 'Отделение "{}"создано:'.format(data['department']['name']),
-        Department.Edit.NAME: lambda: 'Название отделения изменено на "{}".'.format(db_response['name']),
-        Department.Edit.LOCATION: lambda: 'Адрес отделения изменен на "{}".:'.format(db_response['location']),
-        Role.Create.NAME: lambda: 'Теперь задайте разрешения для роли.',
-        Role.Edit.NAME: lambda: 'Название роли изменено на "{}".'.format(db_response['name']),
-        Product.Create.VENDOR_CODE: lambda: 'Введите наименование товара: ',
-        Product.Create.NAME: lambda: 'Введите или выберите единицу измерения: ',
-        Product.Create.UNIT: lambda: 'Выберите категорию: ',
-        Product.Edit.NAME: lambda: 'Название товара изменено на "{}".'.format(db_response['name']),
-        Product.Edit.VENDOR_CODE: lambda: 'Артикул (код товара) товара изменен на "{}".'.format(db_response['vendor_code']),
-        Product.Edit.UNIT: lambda: 'Единицы измерения товара изменены на "{}".'.format(db_response['units']),
-        Receipt.Edit.NOTE: lambda: 'Примечание было изменено на "{}".'.format(db_response['note']),
+        User.Edit.NAME: lambda: 'User name changed to {}.'.format(db_response['name']),
+        User.Create.NUMBER: lambda: 'Choose a role for the user:',
+        User.Edit.NUMBER: lambda: 'Phone number changed to {}.'.format(db_response['phone_number']),
+        User.Edit.NUMBER_OWN: lambda: 'Phone number changed to {}.'.format(db_response['phone_number']) +
+        '\nNow you can log in with another Telegram account.',
+        Category.Create.NAME: lambda: 'Category "{}" created.'.format(db_response['name']),
+        Category.Edit.NAME: lambda: 'Category name changed to "{}".'.format(db_response['name']),
+        Department.Create.NAME: lambda: 'Enter department address:',
+        Department.Create.LOCATION: lambda: 'Department "{}" created:'.format(data['department']['name']),
+        Department.Edit.NAME: lambda: 'Department name changed to "{}".'.format(db_response['name']),
+        Department.Edit.LOCATION: lambda: 'Department address changed to "{}".:'.format(db_response['location']),
+        Role.Create.NAME: lambda: 'Now set permissions for the role.',
+        Role.Edit.NAME: lambda: 'Role name changed to "{}".'.format(db_response['name']),
+        Product.Create.VENDOR_CODE: lambda: 'Enter product name: ',
+        Product.Create.NAME: lambda: 'Enter or choose a unit of measurement: ',
+        Product.Create.UNIT: lambda: 'Choose a category: ',
+        Product.Edit.NAME: lambda: 'Product name changed to "{}".'.format(db_response['name']),
+        Product.Edit.VENDOR_CODE: lambda: 'Product vendor code changed to "{}".'.format(db_response['vendor_code']),
+        Product.Edit.UNIT: lambda: 'Product unit of measurement changed to "{}".'.format(db_response['units']),
+        Receipt.Edit.NOTE: lambda: 'Note was changed to "{}".'.format(db_response['note']),
     }
     get_reply_markup = {
         User.Edit.NAME: lambda: get_back(PROFILES, data['profile_id']),
@@ -288,7 +288,7 @@ async def generic_message_handler(message: types.Message, state: FSMContext):
         execute_db_operation = get_db_operation.get(action, lambda: None)
         db_response = execute_db_operation()
     if db_response and 'already exists' in str(db_response.values()):
-        return await message.answer('Объект с такими данными уже существует.')
+        return await message.answer('An object with this data already exists.')
 
     data['action'] = get_next_action.get(action, action)
     await set_state.get(action, state.finish)()

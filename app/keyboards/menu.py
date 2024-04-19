@@ -9,59 +9,60 @@ from app.data.states import *
 from app.utils import tools
 
 kb_check_status = InlineKeyboardMarkup()
-kb_check_status.add(InlineKeyboardButton('Проверить статус', callback_data=cb.action.new(action=Login.CHECK)))
+kb_check_status.add(InlineKeyboardButton(
+    'Check status', callback_data=cb.action.new(action=Login.CHECK)))
 
 
 def get_back(subject='', data=''):
     """if user_id provided then back to user available
     Buttons:
-        - В меню
-        - К списку пользователей
-        - К пользователю
+        - Back to menu
+        - To list of users
+        - To user
     """
     match subject:
         case subjects.PROFILES:
-            to_first_menu_text = 'К списку пользователей'
+            to_first_menu_text = 'To list of users'
             to_first_menu_action = Menu.PROFILES
-            subject_text = 'К пользователю'
+            subject_text = 'To user'
             subject_action = User.Edit.MENU
         case subjects.ROLES:
-            to_first_menu_text = 'К списку ролей'
+            to_first_menu_text = 'To list of roles'
             to_first_menu_action = Menu.ROLES
-            subject_text = 'К роли'
+            subject_text = 'To role'
             subject_action = Role.Edit.MENU
         case subjects.INVENTORY:
-            to_first_menu_text = 'К выбору отделения'
+            to_first_menu_text = 'To inventory selection'
             to_first_menu_action = Menu.INVENTORY
-            #subject_text = ['К списку накладных']
-            #subject_action = [Inventory.View.DEPARTMENT]
+            # subject_text = ['To list of receipts']
+            # subject_action = [Inventory.View.DEPARTMENT]
         case subjects.RECEIPTS:
-            to_first_menu_text = 'К выбору отделения'
+            to_first_menu_text = 'To receipts department selection'
             to_first_menu_action = Menu.RECEIPTS
-            subject_text = ['К списку накладных',
-                            'К накладной']
+            subject_text = ['To list of receipts',
+                            'To receipt']
             subject_action = [Receipt.Edit.DEPARTMENT,
                               Receipt.Edit.MENU]
         case subjects.PRODUCTS:
-            to_first_menu_text = 'К списку товаров'
+            to_first_menu_text = 'To list of products'
             to_first_menu_action = Menu.PRODUCTS
-            subject_text = 'К товару'
+            subject_text = 'To product'
             subject_action = Product.Edit.MENU
         case subjects.CATEGORIES:
-            to_first_menu_text = 'К списку категорий'
+            to_first_menu_text = 'To list of categories'
             to_first_menu_action = Menu.CATEGORIES
-            subject_text = 'К категории'
+            subject_text = 'To category'
             subject_action = Category.Edit.MENU
         case subjects.DEPARTMENTS:
-            to_first_menu_text = 'К списку отделений'
+            to_first_menu_text = 'To list of departments'
             to_first_menu_action = Menu.DEPARTMENTS
-            subject_text = 'К отделению'
+            subject_text = 'To department'
             subject_action = Department.Edit.MENU
 
     keyboard = InlineKeyboardMarkup()
 
     keyboard.add(InlineKeyboardButton(
-        'В меню', callback_data=cb.action.new(action=Menu.INIT)))
+        'Back to menu', callback_data=cb.action.new(action=Menu.INIT)))
     if subject:
         keyboard.add(InlineKeyboardButton(
             to_first_menu_text,
@@ -91,11 +92,11 @@ def get_back(subject='', data=''):
 kb_send_number = ReplyKeyboardMarkup(
     resize_keyboard=True, selective=True, one_time_keyboard=True)
 kb_send_number.add(KeyboardButton(
-    text="Отправить телефон", request_contact=True))
+    text="Send phone number", request_contact=True))
 kb_skip = ReplyKeyboardMarkup(
     resize_keyboard=True, selective=True, one_time_keyboard=True)
 kb_skip.add(KeyboardButton(
-    text="Пропустить"))
+    text="Skip"))
 
 
 KB_MAIN_MENU = '1'

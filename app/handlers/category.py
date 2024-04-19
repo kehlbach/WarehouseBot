@@ -19,13 +19,13 @@ async def edit_category_init(callback_query: CallbackQuery, callback_data: dict,
     category_id = callback_data['data']
     if set([VIEW, EDIT, DELETE]).intersection(permissions[ROLES]):
         category = db.get(db.CATEGORIES, category_id)
-        text = 'Категория: ' + category['name']
+        text = 'Category: ' + category['name']
         reply_markup = edit_category(
             master,
             category=category,
         )
     else:
-        text = 'Нет доступа'
+        text = 'No access'
         reply_markup = get_back()
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
@@ -45,15 +45,15 @@ async def handle_category_delete(callback_query: CallbackQuery, callback_data: d
         raise_error=False)
     reply_markup = get_back(CATEGORIES)
     if response.status_code == 204:
-        text = 'Категория успешно удалена.'
+        text = 'Category successfully deleted.'
     elif response.status_code==403:
-        text = 'Нет прав на удаление категории.'
+        text = 'Not enough permissions to delete category.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(CATEGORIES, id=category_id)
-        text = 'Нельзя удалить категорию, содержащую товары.'
+        text = 'Cannot delete category that contains products.'
     else:
-        text = 'Произошла ошибка при удалении категории.'
-        logging.warning('⭕тут чет категория не удалилась')
+        text = 'An error occurred while deleting category.'
+        logging.warning('⭕Category was not deleted')
 
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,

@@ -11,7 +11,7 @@ from app.utils import tools
 
 # kb_product_abort = InlineKeyboardMarkup()
 # kb_product_abort.add( InlineKeyboardButton(
-#     'Отменить выбор товара', callback_data=cb.generic.new(
+#     'Cancel operation', callback_data=cb.generic.new(
 #         state=
 #     )
 # ))
@@ -20,9 +20,9 @@ from app.utils import tools
 def kb_back_to_receipts(master, receipt_id, department):
     keyboard = InlineKeyboardMarkup()
     keyboard.add(InlineKeyboardButton(
-        'В меню', callback_data=cb.action.new(action=Menu.INIT)))
+        'To menu', callback_data=cb.action.new(action=Menu.INIT)))
     keyboard.add(InlineKeyboardButton(
-        'К выбору отделения', callback_data=cb.menu_item.new(
+        'Back to receipt choice', callback_data=cb.menu_item.new(
             state=Menu.CHOICE,
             action=Menu.RECEIPTS,
             page=1
@@ -33,7 +33,7 @@ def kb_back_to_receipts(master, receipt_id, department):
         'action': Receipt.Edit.MENU,
     }
     keyboard.add(InlineKeyboardButton(
-        'К созданной накладной',
+        'To created receipt',
         callback_data=cb.generic.new(
             data=dumps([department, receipt_id]), **cb_edit_data
         )))
@@ -45,7 +45,7 @@ def kb_back_to_receipts(master, receipt_id, department):
             'data': '',
         }
         keyboard.add(InlineKeyboardButton(
-            'Добавить накладную', callback_data=cb.generic.new(**cb_add_data)))
+            'Add receipt', callback_data=cb.generic.new(**cb_add_data)))
     return keyboard
 
 
@@ -70,7 +70,7 @@ def get_receipt_department(master: dict, departments_page: dict, page: int) -> I
             'data': '',
         }
         keyboard.add(InlineKeyboardButton(
-            'Добавить накладную', callback_data=cb.generic.new(**cb_add_data)))
+            'Add receipt', callback_data=cb.generic.new(**cb_add_data)))
 
     if set([VIEW, EDIT, DELETE]).intersection(permissions[RECEIPTS]):
         cb_edit_data = {
@@ -78,7 +78,7 @@ def get_receipt_department(master: dict, departments_page: dict, page: int) -> I
             'action': Receipt.Edit.DEPARTMENT,
         }
         keyboard.add(InlineKeyboardButton(
-            'Все доступные отделения',
+            'All available departments',
             callback_data=cb.generic.new(
                 data='', **cb_edit_data
             )))
@@ -86,7 +86,7 @@ def get_receipt_department(master: dict, departments_page: dict, page: int) -> I
             receipts_count = each['receipts_count']
             if each['id'] in master['departments'] and not (each['is_hidden']):
                 keyboard.add(InlineKeyboardButton(
-                    '{}: накладных - {} '.format(each['repr'],receipts_count),
+                    '{}: receipts - {} '.format(each['repr'], receipts_count),
                     callback_data=cb.generic.new(
                         data=each['id'], **cb_edit_data
                     )))
@@ -118,13 +118,13 @@ def get_receipts(master: dict, receipts_page: dict, page: int, department) -> In
     #         'data': '',
     #     }
     #     keyboard.add(InlineKeyboardButton(
-    #         'Добавить накладную', callback_data=cb.generic.new(**cb_add_data)))
+    #         'Add Receipt', callback_data=cb.generic.new(**cb_add_data)))
 
     # back to department choice:
 
     # keyboard.add(
     #     InlineKeyboardButton(
-    #         'К выбору отделения',
+    #         'Back to receipt choice',
     #         callback_data=cb.menu_item.new(
     #             state=Menu.CHOICE,
     #             action=Menu.RECEIPTS,
@@ -170,7 +170,7 @@ def kb_edit_receipt(master, receipt, department=''):
         )
 
         keyboard.add(InlineKeyboardButton(
-            'Изменить примечание',
+            'Change note',
             callback_data=note_cb
         ))
 
@@ -181,7 +181,7 @@ def kb_edit_receipt(master, receipt, department=''):
             data=receipt_id
         )
         keyboard.add(InlineKeyboardButton(
-            'Удалить накладную',
+            'Delete receipt',
             callback_data=del_cb
         ))
 
@@ -193,7 +193,7 @@ def kb_get_types():
     # Add buttons for Приходная, Перемещение, Расходная
     keyboard.add(
         InlineKeyboardButton(
-            'Отмена',
+            'Cancel',
             callback_data=cb.menu_item.new(
                 state=Menu.CHOICE,
                 action=Menu.RECEIPTS,
@@ -204,7 +204,7 @@ def kb_get_types():
 
     keyboard.add(
         InlineKeyboardButton(
-            "Приходная",
+            "Incoming",
             callback_data=cb.generic.new(
                 state=Receipt.Create.TYPE,
                 action=Receipt.Create.TO_DEP,
@@ -213,7 +213,7 @@ def kb_get_types():
         ))
     keyboard.add(
         InlineKeyboardButton(
-            'Перемещение',
+            'Transfer',
             callback_data=cb.generic.new(
                 state=Receipt.Create.TYPE,
                 action=Receipt.Create.FROM_DEP,
@@ -222,7 +222,7 @@ def kb_get_types():
         ))
     keyboard.add(
         InlineKeyboardButton(
-            'Расходная',
+            'Outgoing',
             callback_data=cb.generic.new(
                 state=Receipt.Create.TYPE,
                 action=Receipt.Create.FROM_DEP_ONLY,
@@ -243,7 +243,7 @@ def kb_get_create_department(master: dict,
     if action in [Receipt.Create.TO_DEP, Receipt.Create.FROM_DEP, Receipt.Create.FROM_DEP_ONLY]:
         keyboard = InlineKeyboardMarkup()
         keyboard.add(InlineKeyboardButton(
-            'Отмена',
+            'Cancel',
             callback_data=cb.generic.new(
                 state=Receipt.Edit.DELETE,
                 action=Receipt.Edit.DELETE,
@@ -301,7 +301,7 @@ def kb_add_product(master, products_page, receipt_id, page, remainings=[]) -> In
         ),
     )
     keyboard.add(InlineKeyboardButton(
-        'Отмена',
+        'Cancel',
         callback_data=cb.generic.new(
             state=Receipt.Edit.DELETE,
             action=Receipt.Edit.DELETE,
@@ -313,7 +313,7 @@ def kb_add_product(master, products_page, receipt_id, page, remainings=[]) -> In
 
     keyboard.add(
         InlineKeyboardButton(
-            'Готово',
+            'Done',
             callback_data=cb.generic.new(
                 state=Receipt.Create.PRODUCT,
                 action=Receipt.Create.DONE,
@@ -331,7 +331,8 @@ def kb_add_product(master, products_page, receipt_id, page, remainings=[]) -> In
             for each in products_page['results']:
                 if each['id'] in remainings and remainings[each['id']]:
                     keyboard.add(InlineKeyboardButton(
-                        '{}: доступно {}'.format(each['repr'], remainings[each['id']]),
+                        '{}: available {}'.format(
+                            each['repr'], remainings[each['id']]),
                         callback_data=cb.generic.new(
                             data=dumps([receipt_id, each['id'], remainings[each['id']]]), **cb_edit_data
                         )))

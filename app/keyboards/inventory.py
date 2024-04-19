@@ -30,7 +30,7 @@ def get_inventory_department(master: dict, departments_page: dict, page: int) ->
             'action': Inventory.View.DEPARTMENT,
         }
         keyboard.add(InlineKeyboardButton(
-            'Все доступные отделения',
+            'All available departments',
             callback_data=cb.generic.new(
                 data='', **cb_edit_data
             )))
@@ -47,6 +47,7 @@ def get_inventory_department(master: dict, departments_page: dict, page: int) ->
 
     return keyboard
 
+
 def kb_view_inventory(master, department):
     keyboard = get_back(INVENTORY)
     permissions = tools.permissions(master)
@@ -55,14 +56,14 @@ def kb_view_inventory(master, department):
         'action': Inventory.View.BY_DATE,
     }
     keyboard.add(InlineKeyboardButton(
-        'До определенной даты', callback_data=cb.generic.new(
+        'By date', callback_data=cb.generic.new(
             state=Inventory.View.BY_DATE,
             action=Inventory.View.BY_DATE,
             data=department
         )
     ))
     # keyboard.add(InlineKeyboardButton(
-    #     'Экспорт', callback_data=cb.generic.new(
+    #     'Export', callback_data=cb.generic.new(
     #         state=Inventory.View.EXPORT,
     #         action=Inventory.View.EXPORT,
     #         data=department

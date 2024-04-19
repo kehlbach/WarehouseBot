@@ -20,13 +20,13 @@ async def edit_role_init(callback_query: CallbackQuery, callback_data: dict, sta
     if set([VIEW, EDIT, DELETE]).intersection(permissions[ROLES]):
         role = db.get(db.ROLES, role_id)
         permissions_text = role['permissions_repr']
-        replaces = {' ': '\n    ', ',': ', ', ':': ': ', 'смотреть, добавлять, изменять, удалять': 'полный доступ'}
+        replaces = {' ': '\n    ', ',': ', ', ':': ': ', 'view, add, edit, delete': 'full access'}
         for key, value in replaces.items():
             permissions_text = permissions_text.replace(key, value)
-        text = 'Роль: ' + role['name']+'\nРазрешения: \n    '+permissions_text
+        text = 'Role: ' + role['name']+'\nPermissions: \n    '+permissions_text
         reply_markup = edit_role(master, role=role,)
     else:
-        text = 'Нет доступа'
+        text = 'No access'
         reply_markup = None
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
@@ -34,6 +34,7 @@ async def edit_role_init(callback_query: CallbackQuery, callback_data: dict, sta
         text=text,
         reply_markup=reply_markup
     )
+
 
 
 @dp.callback_query_handler(cb.role_permissions.filter(
@@ -64,25 +65,25 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
     else:
         action_class = Role.Create.Permissions
     if action == action_class.BACK:
-        text = 'Выберите сущность:'
+        text = 'Select entity:'
         role = db.get(db.ROLES, role_id)
         reply_markup = get_role_permissions(action_class, role)
     elif action == action_class.DONE:
         if action_class == Role.Create.Permissions:
-            text = 'Роль создана.'
+            text = 'Role created.'
         else:
-            text = 'Работа с разрешениями завершена.'
+            text = 'Role permissions editing completed.'
         reply_markup = get_back(ROLES, role_id)
     else:
         if EDIT in permissions[ROLES] and not role_id == master['role']:
             match action:
                 case action_class.MENU:
                     role = db.get(db.ROLES, role_id)
-                    text = 'Выберите сущность:'
+                    text = 'Select role:'
                     reply_markup = get_role_permissions(action_class, role)
                 case action_class.ALL:
                     subject_id = int(callback_data['subject_id'])
-                    text = 'Выберите разрешения для сущности "{}":'.format(ALL_SUBJECTS[subject_id])
+                    text = 'Select permissions for role "{}":'.format(ALL_SUBJECTS[subject_id])
                     role = db.get(db.ROLES, role_id)
                     permissions = dict(loads(role['permissions']))
                     if permissions[subject_id] == list(ALL_ACTIONS.keys()):
@@ -103,14 +104,14 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                 case action_class.SUBJECT:
                     role = db.get(db.ROLES, role_id)
                     subject_id = int(callback_data['subject_id'])
-                    text = 'Выберите разрешения для сущности "{}":'.format(ALL_SUBJECTS[subject_id])
+                    text = 'Select permissions for role "{}":'.format(ALL_SUBJECTS[subject_id])
                     reply_markup = get_role_permission(action_class, role, subject_id)
                 case action_class.SPECIFIC:
                     subject_id = int(callback_data['subject_id'])
                     action_id = int(callback_data['action_id'])
                     role = db.get(db.ROLES, role_id)
                     permissions = permissions = dict(loads(role['permissions']))
-                    text = 'Выберите разрешения для сущности "{}":'.format(ALL_SUBJECTS[subject_id])
+                    text = 'Select permissions for role "{}":'.format(ALL_SUBJECTS[subject_id])
                     if action_id in permissions[subject_id]:
                         role_permission = db.filter(db.ROLE_PERMISSIONS, role=role_id,
                                                     subject=subject_id, action=action_id)
@@ -122,9 +123,9 @@ async def init_role_permissions(callback_query: CallbackQuery, callback_data: di
                     reply_markup = get_role_permission(action_class, role, subject_id)
 
         elif role_id == master['role']:
-            return await callback_query.answer('Нельзя менять права для своей роли.')
+            return await callback_query.answer('Unable to change permissions for your role.')
         else:
-            return await callback_query.answer('Нет прав.')
+            return await callback_query.answer('Not enough permissions.')
     return await bot.edit_message_text(
         chat_id=callback_query.from_user.id,
         message_id=callback_query.message.message_id,
@@ -143,15 +144,15 @@ async def handle_role_delete(callback_query: CallbackQuery, callback_data: dict,
         raise_error=False)
     reply_markup = get_back(ROLES)
     if response.status_code == 204:
-        text = 'Роль успешно удалена.'
+        text = 'Role successfully deleted.'
     elif response.status_code == 403:
-        text = 'Нет прав на удаление роли.'
+        text = 'Insufficient permissions to delete role.'
     elif 'ProtectedError' in response.text:
         reply_markup = get_back(ROLES, data=role_id)
-        text = 'Нельзя удалить роль, для которой заданы пользователи.'
+        text = 'Cannot delete role that has assigned users.'
     else:
-        text = 'Произошла ошибка при удалении роли.'
-        logging.warning('⭕тут чет роль не удалилась')
+        text = 'An error occurred while deleting role.'
+        logging.warning('⭕ role not deleted')
 
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,

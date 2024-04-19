@@ -19,8 +19,8 @@ def name_validator(name) -> tuple[str,bool,str]:
         return name, is_valid, ''
     else:
         is_valid = False
-        error_text = 'Не соответствует шаблону "Фамилия Имя Отчество"\n' +\
-            'Введите ФИО. Пример:\n Иванов Иван Иванович'
+        error_text = 'Name is not valid.\n Name can contain only letters, spaces and dashes.' +\
+            'Enter name. Example:\n John Smith'
         return name, is_valid, error_text
 
 
@@ -37,7 +37,7 @@ def number_preprocessor(message: types.Message, source_number: str = '', login =
         parsed_number = phonenumbers.parse(number, COUNTRY_CODE)
     except phonenumbers.NumberParseException:
         is_valid=False
-        error_text = 'Некорректный номер. Попробуйте снова.'
+        error_text = 'Invalid phone number. Please, try again.'
     except Exception as e:
         is_valid=False
         error_text = e
@@ -46,10 +46,10 @@ def number_preprocessor(message: types.Message, source_number: str = '', login =
         parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
     if source_number == formatted_number:
         is_valid=False
-        error_text = 'Номер совпадает с прежним.'
+        error_text = 'Number is the same.'
     elif db.filter(db.PROFILES, phone_number=formatted_number) and not login:
         is_valid = False
-        error_text = 'Такой номер уже зарегистрирован.'
+        error_text = 'This number is already registered.'
     else:
         is_valid = True
         error_text = ''

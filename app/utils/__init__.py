@@ -2,4 +2,5 @@
 # flake8: noqa
 from .config import DB_API_URL, DB_LOGIN, DB_PASSWORD
 from . import config, processors, tools
-NAME_PATTERN = r'([А-Я]{1}[а-я]+) ([А-Я]{1}[а-я]+) ([А-Я]{1}[а-я]+)'
+NAME_PATTERN = r'[\w\s-]+'
+

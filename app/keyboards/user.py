@@ -9,22 +9,23 @@ from app.keyboards.menu import _get_pages, get_back
 from app.utils import tools
 
 btn_add_user = InlineKeyboardButton(
-    'Добавить пользователя', callback_data=cb.generic.new(
-        state= Generic.CALLBACK_TO_MESSAGE_INIT,
-        action= User.Create.NUMBER,
-        data= ''))
+    'Add user', callback_data=cb.generic.new(
+        state=Generic.CALLBACK_TO_MESSAGE_INIT,
+        action=User.Create.NUMBER,
+        data=''))
+
 
 def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
     """
     Generates an inline keyboard with available (according to permissions) options to change profiles.
     Buttons:
-        - В меню
-        - К списку пользователей
-        - Изменить имя
-        - Изменить номер
-        - Изменить роль
-        - Изменить отделения
-        - Удалить пользователя
+        - Back to menu
+        - Back to users list
+        - Change name
+        - Change number
+        - Change role
+        - Change departments
+        - Delete user
 
     Args:
         master (dict): The user requesting keyboard.
@@ -41,14 +42,14 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
 
     if EDIT in permissions[PROFILES]:
         keyboard.add(InlineKeyboardButton(
-            'Изменить имя',
+            'Change name',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_TO_MESSAGE_INIT,
                 action=User.Edit.NAME,
                 data=dumps([cb_data['profile_id']]))))
         if master['id'] == profile['id']:
             keyboard.add(InlineKeyboardButton(
-                'Изменить номер',
+                'Change number',
                 callback_data=cb.generic.new(
                     state=Generic.CALLBACK_TO_MESSAGE_INIT,
                     action=User.Edit.NUMBER_OWN,
@@ -57,7 +58,7 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
                          profile['phone_number']]))))
         else:
             keyboard.add(InlineKeyboardButton(
-                'Изменить номер',
+                'Change number',
                 callback_data=cb.generic.new(
                     state=Generic.CALLBACK_TO_MESSAGE_INIT,
                     action=User.Edit.NUMBER,
@@ -65,7 +66,7 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
                         [cb_data['profile_id'],
                          profile['phone_number']]))))
             keyboard.add(InlineKeyboardButton(
-                'Изменить роль',
+                'Change role',
                 callback_data=cb.user_role.new(
                     state=Generic.CALLBACK_HANDLE,
                     action=User.Edit.Roles.MENU,
@@ -73,7 +74,7 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
                     page=1,
                     **cb_data)))
         keyboard.add(InlineKeyboardButton(
-            'Изменить отделения',
+            'Change departments',
             callback_data=cb.user_departments.new(
                 state=Generic.CALLBACK_HANDLE,
                 action=User.Edit.Departments.MENU,
@@ -83,7 +84,7 @@ def edit_user(master: dict, profile: dict) -> InlineKeyboardMarkup:
                 **cb_data)))
     if DELETE in permissions[PROFILES] and not master['id'] == profile['id']:
         keyboard.add(InlineKeyboardButton(
-            'Удалить пользователя',
+            'Delete user',
             callback_data=cb.generic.new(
                 state=Generic.CALLBACK_HANDLE,
                 action=User.Edit.DELETE,
@@ -116,7 +117,7 @@ def get_user_departments(
             **cb_data))
 
     keyboard.add(InlineKeyboardButton(
-        'Готово',
+        'Done',
         callback_data=cb.user_departments.new(
             action=action_class.DONE,
             phone_number=profile['phone_number'],
@@ -127,7 +128,7 @@ def get_user_departments(
     else:
         checked_1 = '❌ '
     keyboard.add(InlineKeyboardButton(
-        checked_1+'Все отделения',
+        checked_1+'All departments',
         callback_data=cb.user_departments.new(
             action=action_class.ALL,
             department_id='',
@@ -185,8 +186,6 @@ def get_user_roles(
     return keyboard
 
 
-
-
 def get_profiles(master: dict, profiles_page: dict, page: int):
     keyboard = InlineKeyboardMarkup()
     permissions = tools.permissions(master)
@@ -199,7 +198,7 @@ def get_profiles(master: dict, profiles_page: dict, page: int):
             action=Menu.PROFILES,
             page=page))
     keyboard.add(InlineKeyboardButton(
-        'В меню', callback_data=cb.action.new(action=Menu.INIT)))
+        'Back to menu', callback_data=cb.action.new(action=Menu.INIT)))
 
     if ADD in permissions[PROFILES]:
         keyboard.add(btn_add_user)
@@ -220,4 +219,3 @@ def get_profiles(master: dict, profiles_page: dict, page: int):
         keyboard.row(*page_row)
 
     return keyboard
-

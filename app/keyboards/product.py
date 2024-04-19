@@ -14,10 +14,10 @@ kb_get_units = ReplyKeyboardMarkup(
     one_time_keyboard=True,
     keyboard=[
         [
-            KeyboardButton(text='шт'),
-            KeyboardButton(text='кг'),
-            KeyboardButton(text='м'),
-            KeyboardButton(text='л')
+            KeyboardButton(text='pcs'),
+            KeyboardButton(text='kg'),
+            KeyboardButton(text='m'),
+            KeyboardButton(text='l')
         ]
     ]
 )
@@ -44,7 +44,7 @@ def get_products(master: dict, products_page: dict, page: int) -> InlineKeyboard
             'data': '',
         }
         keyboard.add(InlineKeyboardButton(
-            'Добавить товар', callback_data=cb.generic.new(**cb_add_data)))
+            'Add product', callback_data=cb.generic.new(**cb_add_data)))
 
     if set([VIEW, EDIT, DELETE]).intersection(permissions[PRODUCTS]):
         cb_edit_data = {
@@ -72,7 +72,6 @@ def edit_product(master, product):
     product_id = cb_data['product_id']
     product_id_jsoned = dumps([product_id])
 
-
     if EDIT in permissions[PRODUCTS]:
         name_cb = cb.generic.new(
             state=Generic.CALLBACK_TO_MESSAGE_INIT,
@@ -91,19 +90,19 @@ def edit_product(master, product):
         )
 
         keyboard.add(InlineKeyboardButton(
-            'Изменить наименование',
+            'Rename',
             callback_data=name_cb
         ))
         keyboard.add(InlineKeyboardButton(
-            'Изменить артикул (код товара)',
+            'Change vendor code',
             callback_data=vendor_cb
         ))
         keyboard.add(InlineKeyboardButton(
-            'Изменить единицы измерения',
+            'Change unit',
             callback_data=unit_cb
         ))
         keyboard.add(InlineKeyboardButton(
-            'Изменить категорию',
+            'Change category',
             callback_data=cb.product_category.new(
                 state=Generic.CALLBACK_HANDLE,
                 action=Product.Edit.Category.MENU,
@@ -120,7 +119,7 @@ def edit_product(master, product):
             data=product_id
         )
         keyboard.add(InlineKeyboardButton(
-            'Удалить товар',
+            'Delete product',
             callback_data=del_cb
         ))
 

@@ -33,8 +33,8 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
         action_class = User.Create.Departments
 
     match callback_data['action']:
-        case  User.Edit.Departments.ALL | User.Create.Departments.ALL:
-            text = 'Выберите отделения, с которыми пользователь может работать:'
+        case User.Edit.Departments.ALL | User.Create.Departments.ALL:
+            text = 'Choose departments user can work with:'
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             all_departments = db.get(db.DEPARTMENTS)
             all_departments_ids = [i['id'] for i in all_departments]
@@ -59,7 +59,7 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
                 profile=profile
             )
         case User.Create.Departments.MENU | User.Edit.Departments.MENU:
-            text = 'Выберите отделения, с которыми пользователь может работать:'
+            text = 'Choose departments user can work with:'
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             all_departments = db.get(db.DEPARTMENTS)
             departments_page = db.get_page(db.DEPARTMENTS, page)
@@ -74,7 +74,7 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             all_departments = db.get(db.DEPARTMENTS)
             departments_page = db.get_page(db.DEPARTMENTS, page)
-            text = 'Выберите отделения, с которыми пользователь может работать:'
+            text = 'Choose departments user can work with:'
             profile = db.get(db.PROFILES, callback_data['profile_id'])
             if int(callback_data['department_id']) in profile['departments']:
                 profile['departments'].remove(int(callback_data['department_id']))
@@ -93,9 +93,9 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
             )
         case User.Edit.Departments.DONE:
             reply_markup = get_back(PROFILES, callback_data['profile_id'])
-            text = 'Новые отделения успешно заданы.'
+            text = 'New departments successfully set.'
         case User.Create.Departments.DONE:
-            text = 'Пользователь с номером {} создан'.format(
+            text = 'User with number {} created'.format(
                 callback_data['phone_number'])
             reply_markup = get_back(PROFILES, callback_data['profile_id'])
             reply_markup.add(btn_add_user)
@@ -106,6 +106,7 @@ async def handle_user_edit_department(callback_query: CallbackQuery, callback_da
         text=text,
         reply_markup=reply_markup
     )
+
 
 
 @dp.callback_query_handler(cb.user_role.filter(
@@ -123,16 +124,16 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
 
     match action:
         case User.Create.Roles.MENU:
-            text = 'Выберите роль пользователя:'
+            text = 'Choose user role:'
             roles_page = db.get_page(db.ROLES, page)
             reply_markup = get_user_roles(User.Create.Roles, page, callback_data['profile_id'], roles_page)
         case User.Edit.Roles.MENU:
-            text = 'Выберите роль пользователя:'
+            text = 'Choose user role:'
             roles_page = db.get_page(db.ROLES, page)
             reply_markup = get_user_roles(
                 User.Edit.Roles, page, callback_data['profile_id'], roles_page)
         case User.Create.Roles.SPECIFIC:
-            text = 'Выберите отделения, с которыми пользователь может работать:'
+            text = 'Choose departments user can work with:'
             created_user = db.edit_patch(
                 db.PROFILES,
                 id=callback_data['profile_id'],
@@ -152,7 +153,7 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
                 id=callback_data['profile_id'],
                 role=callback_data['role_id'],
                 requester=callback_query.message.chat.id)
-            text = 'Роль успешно изменена. Новая роль - {}.'.format(
+            text = 'Role successfully changed. New role - {}.'.format(
                 changed_user['role_name'])
             reply_markup = get_back(PROFILES, callback_data['profile_id'])
 
@@ -164,6 +165,7 @@ async def handle_user_edit_role(callback_query: CallbackQuery, callback_data: di
     )
 
 
+
 @dp.callback_query_handler(cb.generic.filter(action=(User.Edit.DELETE)), state='*')
 async def handle_user_delete(callback_query: CallbackQuery, callback_data: dict, state: FSMContext):
     profile_id = callback_data['data']
@@ -173,12 +175,12 @@ async def handle_user_delete(callback_query: CallbackQuery, callback_data: dict,
         requester=callback_query.message.chat.id,
         raise_error=False)
     if response.status_code == 204:
-        text = 'Пользователь успешно удален.'
+        text = 'User deleted successfully.'
     elif response.status_code == 403:
-        text = 'Нет прав на удаление категории.'
+        text = 'No permission to delete user.'
     else:
-        text = 'Произошла ошибка при удалении пользователя.'
-        logging.warning('⭕тут чет пользователь не удалился')
+        text = 'An error occurred while deleting the user.'
+        logging.warning('⭕User was not deleted')
     reply_markup = get_back(PROFILES)
     return await bot.edit_message_text(
         chat_id=callback_query.message.chat.id,
@@ -198,20 +200,20 @@ async def edit_user_init(callback_query: CallbackQuery, callback_data: dict, sta
         profile = db.get(db.PROFILES, profile_id)
         all_departments = db.get(db.DEPARTMENTS)
         if master['id'] == profile['id']:
-            text = 'Это вы'
+            text = 'This is you'
         else:
-            text = 'Пользователь'
+            text = 'User'
         all_departments_id_to_name = {
             i['id']: i['name'] for i in all_departments}
         if profile['departments'] == list(all_departments_id_to_name.keys()):
-            user_department_names = 'все отделения'
+            user_department_names = 'all departments'
         else:
             user_department_names = '\n'.join(
                 [all_departments_id_to_name[i] for i in profile['departments']])
-        text += '\nИмя пользователя: ' + profile['name'] +\
-                '\nНомер: ' + profile['phone_number'] +\
-                '\nРоль: ' + profile['role_name'] +\
-                '\nОтделения: '+user_department_names
+        text += '\nName: ' + profile['name'] +\
+                '\nPhone number: ' + profile['phone_number'] +\
+                '\nRole: ' + profile['role_name'] +\
+                '\nDepartments: '+user_department_names
         reply_markup = edit_user(master=master,
                                  profile=profile)
         return await bot.edit_message_text(
@@ -221,4 +223,4 @@ async def edit_user_init(callback_query: CallbackQuery, callback_data: dict, sta
             reply_markup=reply_markup
         )
     else:
-        return await callback_query.answer('Нет прав')
+        return await callback_query.answer('No access')

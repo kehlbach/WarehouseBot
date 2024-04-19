@@ -6,12 +6,12 @@ PRODUCTS = 24
 CATEGORIES = 25
 DEPARTMENTS = 26
 ALL_DEPARTMENTS = 27
-ALL_SUBJECTS = dict((
-    (PROFILES, 'Пользователи'),
-    (ROLES, 'Роли'),
-    (INVENTORY, 'Остатки'),
-    (RECEIPTS, 'Накладные'),
-    (PRODUCTS, 'Товары'),
-    (CATEGORIES, 'Категории'),
-    (DEPARTMENTS, 'Отделения')
-))
+ALL_SUBJECTS = {
+    PROFILES: 'Users',
+    ROLES: 'Roles',
+    INVENTORY: 'Inventory',
+    RECEIPTS: 'Receipts',
+    PRODUCTS: 'Products',
+    CATEGORIES: 'Categories',
+    DEPARTMENTS: 'Departments'
+}
