@@ -3,7 +3,8 @@ from pathlib import Path
 
 from envparse import env
 
-app_dir: Path = Path(__file__).parent.parent
+
+app_dir: Path = Path().absolute()
 env_file = app_dir / ".env"
 if path.isfile(env_file):
     env.read_envfile(env_file)
