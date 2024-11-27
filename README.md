@@ -28,7 +28,7 @@ sudo apt-get install ttf-dejavu
 Create .env based on .env.example.
 
 App can use ngrok for webhook
-Webhook host will only be used only if SERVERLESS=True and NGROK=False.
+Webhook host will only be used only if WEBHOOK=True and WEBHOOK_NGROK=False.
 
 Database is REST API Service, specifically this:
 [WarehouseDatabase](https://github.com/valentinkelbakh/WarehouseDatabase "WarehouseDatabase")

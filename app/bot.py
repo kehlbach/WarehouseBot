@@ -6,32 +6,39 @@ from aiogram import Dispatcher, executor, types
 from pyngrok import ngrok
 
 from app.loader import bot, db, dp
-from app.utils.config import (ADMIN_NUMBER, COUNTRY_CODE, NGROK, SERVERLESS,
-                              WEBAPP_HOST, WEBAPP_PORT, WEBHOOK_HOST,
-                              WEBHOOK_PATH)
+from app.utils.config import (
+    ADMIN_NUMBER,
+    COUNTRY_CODE,
+    WEBHOOK_NGROK,
+    WEBHOOK,
+    WEBAPP_HOST,
+    WEBAPP_PORT,
+    WEBHOOK_HOST,
+    WEBHOOK_PATH,
+)
 
 logging.basicConfig(level=logging.INFO)
 
 
 async def on_startup(dispatcher: Dispatcher) -> None:
-    if SERVERLESS:
-        if NGROK:
-            WEBHOOK_PATH = ''
+    if WEBHOOK:
+        if WEBHOOK_NGROK:
+            WEBHOOK_PATH = ""
             ngrok.connect(WEBAPP_PORT)
             urls = list(i.public_url for i in ngrok.get_tunnels()
                         if 'https' in i.public_url)
             WEBHOOK_URL = [i for i in urls if 'https' in i][0]
-            logging.info('Ngrok URL received.')
+            logging.info("🟢 Ngrok URL received.")
         else:
             WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
-        logging.info("🟢 Bot launched as Serverless!")
+        logging.info("🟢 Bot is launching with webhooks...")
         logging.info(f"webhook: {WEBHOOK_URL}")
         webhook = await dispatcher.bot.get_webhook_info()
         if webhook.url:
             await bot.delete_webhook()
         await bot.set_webhook(WEBHOOK_URL)
     else:
-        logging.info("🟢 Bot launched!")
+        logging.info("🟢 Bot is launching with polling...")
     try:
         parsed_number = phonenumbers.parse(ADMIN_NUMBER, COUNTRY_CODE)
         formatted_number = phonenumbers.format_number(
@@ -63,16 +70,17 @@ async def on_startup(dispatcher: Dispatcher) -> None:
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
     logging.warning("🟠 Bot shutdown...")
-    if SERVERLESS is True:
+    if WEBHOOK is True:
         await bot.delete_webhook()
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
 
 
-def bot_register(webhook: bool = False) -> None:
+def bot_register() -> None:
     try:
         import app.handlers
-        if SERVERLESS and webhook:
+
+        if WEBHOOK:
             executor.start_webhook(
                 dispatcher=dp,
                 webhook_path=WEBHOOK_PATH,
@@ -97,4 +105,4 @@ def bot_register(webhook: bool = False) -> None:
 
 
 if __name__ == '__main__':
-    bot_register(True)
+    bot_register()
