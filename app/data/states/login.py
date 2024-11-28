@@ -5,6 +5,6 @@ class Login(StatesGroup):
     number = State()
     name = State()
     check = State()
-    NUMBER = 'L1'
-    NAME = 'L2'
-    CHECK = 'L3'
+    NUMBER = "L1"
+    NAME = "L2"
+    CHECK = "L3"

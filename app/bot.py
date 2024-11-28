@@ -25,9 +25,10 @@ async def on_startup(dispatcher: Dispatcher) -> None:
         if WEBHOOK_NGROK:
             WEBHOOK_PATH = ""
             ngrok.connect(WEBAPP_PORT)
-            urls = list(i.public_url for i in ngrok.get_tunnels()
-                        if 'https' in i.public_url)
-            WEBHOOK_URL = [i for i in urls if 'https' in i][0]
+            urls = list(
+                i.public_url for i in ngrok.get_tunnels() if "https" in i.public_url
+            )
+            WEBHOOK_URL = [i for i in urls if "https" in i][0]
             logging.info("🟢 Ngrok URL received.")
         else:
             WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
@@ -42,30 +43,41 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     try:
         parsed_number = phonenumbers.parse(ADMIN_NUMBER, COUNTRY_CODE)
         formatted_number = phonenumbers.format_number(
-            parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+            parsed_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+        )
     except phonenumbers.NumberParseException:
-        logging.error('🔴 Admin phone number is incorrect.')
+        logging.error("🔴 Admin phone number is incorrect.")
 
-    no_permissions = db.filter(db.ROLES, name='No permissions')
+    no_permissions = db.filter(db.ROLES, name="No permissions")
     if not no_permissions:
-        db.add(db.ROLES, name='No permissions')
-    admin_role = db.filter(db.ROLES, name='Admin')
+        db.add(db.ROLES, name="No permissions")
+    admin_role = db.filter(db.ROLES, name="Admin")
     if not admin_role:
-        db.add(db.ROLES, name='Admin')
-        admin_role = db.filter(db.ROLES, name='Admin')
+        db.add(db.ROLES, name="Admin")
+        admin_role = db.filter(db.ROLES, name="Admin")
         for subject in db.get(db.SUBJECTS).keys():
             for action in db.get(db.ACTIONS).keys():
-                db.add(db.ROLE_PERMISSIONS, role=admin_role['id'], subject=subject,
-                       action=action)
+                db.add(
+                    db.ROLE_PERMISSIONS,
+                    role=admin_role["id"],
+                    subject=subject,
+                    action=action,
+                )
     admin = db.filter(db.PROFILES, phone_number=formatted_number)
     if not admin:
+        db.add(
+            db.PROFILES,
+            phone_number=formatted_number,
+            role=admin_role["id"],
+            user_id=formatted_number,
+        )
+    no_category = db.filter(db.CATEGORIES, name="No category")
+    if not no_category:
+        db.add(db.CATEGORIES, name="No category")
 
-        db.add(db.PROFILES,
-               phone_number=formatted_number,
-               role=admin_role['id'],
-               user_id=formatted_number)
-
-    await dispatcher.bot.set_my_commands([types.BotCommand(command="/start", description="Start the bot")])
+    await dispatcher.bot.set_my_commands(
+        [types.BotCommand(command="/start", description="Start the bot")]
+    )
 
 
 async def on_shutdown(dispatcher: Dispatcher) -> None:
@@ -104,5 +116,5 @@ def bot_register() -> None:
         logging.exception(e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bot_register()

@@ -2,12 +2,12 @@
 
 ![](https://img.shields.io/badge/python-v3.10-informational) ![](https://img.shields.io/badge/aiogram-v2.25.1-informational)
 
-
 This is bot for warehouse accounting
 
 ## Running Locally
 
 Brief example with venv
+
 ```cmd
 git clone https://github.com/valentinkelbakh/WarehouseBot.git
 cd WarehouseBot
@@ -15,12 +15,15 @@ python -m venv .venv
 .venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
 ```
+
 To run the bot:
+
 ```
 python -m app
 ```
 
 If you run on linux, Bot requires font DejaVu, can be installed with similar command:
+
 ```bash
 sudo apt-get install ttf-dejavu
 ```
@@ -34,7 +37,6 @@ Database is REST API Service, specifically this:
 [WarehouseDatabase](https://github.com/valentinkelbakh/WarehouseDatabase "WarehouseDatabase")
 
 ## Features
-
 
 The bot supports multiple users, authenticated via phone numbers. Key entities include User, Role, Department, Category, Product, Receipt, and Inventory.
 
@@ -89,4 +91,3 @@ Every function represented by the buttons in the images is fully functional
 ![department1](https://github.com/valentinkelbakh/WarehouseBot/assets/114210745/75ef9b51-28cd-47e9-876b-1f09b2db33a7)
 
 ![department2](https://github.com/valentinkelbakh/WarehouseBot/assets/114210745/a1c00bf0-bde7-443d-ae96-9669755cff55)
-

@@ -4,40 +4,41 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 class Create:
-    """ >>> NUMBER, NAME
+    """>>> NUMBER, NAME
     >>> Departments: MENU, DONE, ALL, SPECIFIC
-    >>> Roles: MENU, SPECIFIC """
+    >>> Roles: MENU, SPECIFIC"""
 
-    NUMBER = 'UC2'
-    NAME = 'UC5'
+    NUMBER = "UC2"
+    NAME = "UC5"
 
     class Departments:
-        MENU = 'UCD'
-        DONE = 'UCD1'
-        ALL = 'UCD2'
-        SPECIFIC = 'UCD3'
+        MENU = "UCD"
+        DONE = "UCD1"
+        ALL = "UCD2"
+        SPECIFIC = "UCD3"
 
     class Roles:
-        MENU = 'UCR'
-        SPECIFIC = 'UCR1'
+        MENU = "UCR"
+        SPECIFIC = "UCR1"
 
 
 class Edit:
-    """ >>> MENU, NUMBER, NUMBER_OWN, NAME, DELETE
+    """>>> MENU, NUMBER, NUMBER_OWN, NAME, DELETE
     >>> Departments: MENU, DONE, ALL, SPECIFIC
-    >>> Roles: MENU, SPECIFIC """
-    MENU = 'UE1'
-    NUMBER = 'UE2'
-    NUMBER_OWN = 'UE7'
-    NAME = 'UE5'
-    DELETE = 'UE6'
+    >>> Roles: MENU, SPECIFIC"""
+
+    MENU = "UE1"
+    NUMBER = "UE2"
+    NUMBER_OWN = "UE7"
+    NAME = "UE5"
+    DELETE = "UE6"
 
     class Departments:
-        MENU = 'UED'
-        DONE = 'UED1'
-        ALL = 'UED2'
-        SPECIFIC = 'UED3'
+        MENU = "UED"
+        DONE = "UED1"
+        ALL = "UED2"
+        SPECIFIC = "UED3"
 
     class Roles:
-        MENU = 'UER'
-        SPECIFIC = 'UER1'
+        MENU = "UER"
+        SPECIFIC = "UER1"

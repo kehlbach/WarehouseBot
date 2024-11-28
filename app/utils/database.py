@@ -8,18 +8,18 @@ class Database:
         self.URL = url
         self.session = Session()
         self.session.auth = (login, password)
-        self.DEPARTMENTS = 'departments'
-        self.ROLES = 'roles'
-        self.ROLE_PERMISSIONS = 'role_permissions'
-        self.PROFILES = 'profiles'
-        self.CATEGORIES = 'categories'
-        self.PRODUCTS = 'products'
-        self.RECEIPTS = 'receipts'
-        self.RECEIPT_PRODUCTS = 'receipt_products'
-        self.INVENTORY = 'inventory'
-        self.INVENTORY_SUMMARY = 'latest_inventory'
-        self.SUBJECTS = 'subjects'
-        self.ACTIONS = 'actions'
+        self.DEPARTMENTS = "departments"
+        self.ROLES = "roles"
+        self.ROLE_PERMISSIONS = "role_permissions"
+        self.PROFILES = "profiles"
+        self.CATEGORIES = "categories"
+        self.PRODUCTS = "products"
+        self.RECEIPTS = "receipts"
+        self.RECEIPT_PRODUCTS = "receipt_products"
+        self.INVENTORY = "inventory"
+        self.INVENTORY_SUMMARY = "latest_inventory"
+        self.SUBJECTS = "subjects"
+        self.ACTIONS = "actions"
         self.SUBJECT = {
             constants.DEPARTMENTS: self.DEPARTMENTS,
             constants.ROLES: self.ROLES,
@@ -27,28 +27,30 @@ class Database:
             constants.CATEGORIES: self.CATEGORIES,
             constants.PRODUCTS: self.PRODUCTS,
             constants.RECEIPTS: self.RECEIPTS,
-            constants.INVENTORY: self.INVENTORY
+            constants.INVENTORY: self.INVENTORY,
         }
         self._permissions = {}
 
-    def get(self, subject: str, id: int = '', requester=None, intended_actions=None) -> dict | list[dict]:
+    def get(
+        self, subject: str, id: int = "", requester=None, intended_actions=None
+    ) -> dict | list[dict]:
         """
-        Get all entities by subject: 
+        Get all entities by subject:
         >>> db.get(db.PROFILES)
 
-        Get entity by id: 
+        Get entity by id:
         >>> db.get(db.PROFILES,data['id'])
 
         requester is Telegram user_id of user requesting the action.
-        If provided, requester permissions will be checked. 
+        If provided, requester permissions will be checked.
         If not enough permissions, raises exception, unless otherwise specified."""
-        url = f'{self.URL}/{subject}'
-        if id or subject in ['actions', 'subjects']:
-            url += f'/{id}'
+        url = f"{self.URL}/{subject}"
+        if id or subject in ["actions", "subjects"]:
+            url += f"/{id}"
             if requester:
-                url += f'/?requester={requester}'
+                url += f"/?requester={requester}"
             if intended_actions:
-                url += f'&intended_actions={intended_actions}'
+                url += f"&intended_actions={intended_actions}"
             response = self.session.get(url)
             if response.status_code == 404:
                 return []
@@ -59,21 +61,21 @@ class Database:
             result = []
             next = True
             if requester:
-                url += f'/?requester={requester}'
+                url += f"/?requester={requester}"
             if intended_actions:
-                url += f'&intended_actions={intended_actions}'
+                url += f"&intended_actions={intended_actions}"
             while next:
                 response = self.session.get(url)
                 if response.status_code == 403:
                     raise PermissionError
                 response = response.json()
-                if 'results' in response.keys():
-                    result = result + response['results']
+                if "results" in response.keys():
+                    result = result + response["results"]
                 else:
                     result = response
                     next = False
-                next = bool(response['next'])
-                url = response['next']
+                next = bool(response["next"])
+                url = response["next"]
             return result
 
     def add(self, _subject, requester=None, **data) -> dict:
@@ -84,7 +86,7 @@ class Database:
         requester is Telegram user_id of user requesting the action.
         If provided, requester permissions will be checked.
         If not enough permissions, raises exception, unless otherwise specified."""
-        url = f'{self.URL}/{_subject}/'
+        url = f"{self.URL}/{_subject}/"
         if requester:
             url_requester = url + f"?requester={requester}"
             response = self.session.post(
@@ -105,13 +107,13 @@ class Database:
         """For operations with ManyToMany, as patch cannot set None for them
 
         requester is Telegram user_id of user requesting the action.
-        If provided, requester permissions will be checked. 
+        If provided, requester permissions will be checked.
         If not enough permissions, raises exception, unless otherwise specified."""
         for key, value in data.items():
             object[key] = value
         url = f'{self.URL}/{subject}/{object["id"]}/'
         if requester:
-            url += f'?requester={requester}'
+            url += f"?requester={requester}"
         response = self.session.put(url, data=object)
         if response.status_code == 403:
             raise PermissionError
@@ -133,9 +135,9 @@ class Database:
         If provided, requester permissions will be checked.
         If not enough permissions, raises exception, unless otherwise specified.
         """
-        url = f'{self.URL}/{subject}/{id}/'
+        url = f"{self.URL}/{subject}/{id}/"
         if requester:
-            url += f'?requester={requester}'
+            url += f"?requester={requester}"
         response = self.session.patch(url, data=data)
         if response.status_code == 403:
             raise PermissionError
@@ -143,17 +145,17 @@ class Database:
         return response
 
     def delete(self, subject, id, requester=None, raise_error=True) -> dict:
-        """ Delete entity
+        """Delete entity
 
         requester is Telegram user_id of user requesting the action.
         If provided, requester permissions will be checked.
 
-        raise_error to specify if exception should be raised 
+        raise_error to specify if exception should be raised
         in case of lack of permissions, True by default.
         """
-        url = f'{self.URL}/{subject}/{id}/'
+        url = f"{self.URL}/{subject}/{id}/"
         if requester:
-            url += f'?requester={requester}'
+            url += f"?requester={requester}"
         response = self.session.delete(url)
         if response.status_code == 403 and raise_error:
             raise PermissionError
@@ -162,40 +164,40 @@ class Database:
     def filter(self, _subject, return_list=False, **conditions) -> list[dict] | dict:
         """usage:
         >>> db.filter('profiles',phone_number='+77479309084')"""
-        url = f'{self.URL}/{_subject}/?'
+        url = f"{self.URL}/{_subject}/?"
         for field, value in conditions.items():
-            value = str(value).replace('+', r'%2B')
-            url += f'{field}={value}&'
+            value = str(value).replace("+", r"%2B")
+            url += f"{field}={value}&"
         response = self.session.get(url)
         if response.status_code == 403:
             raise PermissionError
-        if 'Select a valid choice' in str(response.json()):
+        if "Select a valid choice" in str(response.json()):
             return []
-        result = response.json()['results']
+        result = response.json()["results"]
         if len(result) == 1 and not return_list:
-            return response.json()['results'][0]
+            return response.json()["results"][0]
         else:
-            return response.json()['results']
+            return response.json()["results"]
 
-    def get_page(self, subject, page='1', **arg):
+    def get_page(self, subject, page="1", **arg):
         """usage:
         >>> db.get_page(db.PROFILES, page=2)
         >>> db.get_page(db.RECEIPTS, page=2, department=1)
         """
-        url = f'{self.URL}/{subject}/?page={page}'
+        url = f"{self.URL}/{subject}/?page={page}"
         for key, value in arg.items():
-            url += f'&{key}={value}'
+            url += f"&{key}={value}"
         response = self.session.get(url)
         if response.status_code == 403:
             raise PermissionError
         return response.json()
 
     def next_page(self, response):
-        next = response['next']
+        next = response["next"]
         response = self.session.get(next)
         return response.json()
 
     def prev_page(self, response):
-        previous = response['previous']
+        previous = response["previous"]
         response = self.session.get(previous).json()
         return response

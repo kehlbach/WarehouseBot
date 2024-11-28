@@ -16,31 +16,29 @@ def get_roles(master: dict, roles_page: dict, page: int) -> InlineKeyboardMarkup
     permissions = tools.permissions(master)
 
     page_row = _get_pages(
-        roles_page,
-        cb.menu_item,
-        dict(
-            state=Menu.CHOICE,
-            action=Menu.ROLES,
-            page=page))
+        roles_page, cb.menu_item, dict(state=Menu.CHOICE, action=Menu.ROLES, page=page)
+    )
 
     if ADD in permissions[ROLES]:
         cb_add_data = {
-            'state': Generic.CALLBACK_TO_MESSAGE_INIT,
-            'action': Role.Create.NAME,
-            'data': ''
+            "state": Generic.CALLBACK_TO_MESSAGE_INIT,
+            "action": Role.Create.NAME,
+            "data": "",
         }
-        keyboard.add(InlineKeyboardButton(
-            'Add role', callback_data=cb.generic.new(**cb_add_data)))
+        keyboard.add(
+            InlineKeyboardButton(
+                "Add role", callback_data=cb.generic.new(**cb_add_data)
+            )
+        )
     if set([VIEW, EDIT, DELETE]).intersection(permissions[ROLES]):
-        cb_edit_data = {
-            'state': Role.Edit.MENU,
-            'action': Role.Edit.MENU}
-        for each in roles_page['results']:
-            keyboard.add(InlineKeyboardButton(
-                each['repr'],
-                callback_data=cb.generic.new(
-                    data=each['id'], **cb_edit_data
-                )))
+        cb_edit_data = {"state": Role.Edit.MENU, "action": Role.Edit.MENU}
+        for each in roles_page["results"]:
+            keyboard.add(
+                InlineKeyboardButton(
+                    each["repr"],
+                    callback_data=cb.generic.new(data=each["id"], **cb_edit_data),
+                )
+            )
 
     if page_row:
         keyboard.row(*page_row)
@@ -52,125 +50,132 @@ def edit_role(master, role):
     keyboard = get_back(ROLES)
     permissions = tools.permissions(master)
 
-    cb_data = {'role_id': role['id']}
+    cb_data = {"role_id": role["id"]}
 
     if EDIT in permissions[ROLES]:
-        keyboard.add(InlineKeyboardButton(
-            'Rename',
-            callback_data=cb.generic.new(
-                state=Generic.CALLBACK_TO_MESSAGE_INIT,
-                action=Role.Edit.NAME,
-                data=dumps([cb_data['role_id']],)
-            )
-        ))
-        keyboard.add(InlineKeyboardButton(
-            'Change permissions',
-            callback_data=cb.role_permissions.new(
-                state=Role.Edit.Permissions.MENU,
-                action=Role.Edit.Permissions.MENU,
-                subject_id='',
-                action_id='',
-                role_id=cb_data['role_id'],
+        keyboard.add(
+            InlineKeyboardButton(
+                "Rename",
+                callback_data=cb.generic.new(
+                    state=Generic.CALLBACK_TO_MESSAGE_INIT,
+                    action=Role.Edit.NAME,
+                    data=dumps(
+                        [cb_data["role_id"]],
+                    ),
+                ),
             )
         )
+        keyboard.add(
+            InlineKeyboardButton(
+                "Change permissions",
+                callback_data=cb.role_permissions.new(
+                    state=Role.Edit.Permissions.MENU,
+                    action=Role.Edit.Permissions.MENU,
+                    subject_id="",
+                    action_id="",
+                    role_id=cb_data["role_id"],
+                ),
+            )
         )
 
     if DELETE in permissions[ROLES]:
-        keyboard.add(InlineKeyboardButton(
-            'Delete role',
-            callback_data=cb.generic.new(
-                state=Generic.CALLBACK_HANDLE,
-                action=Role.Edit.DELETE,
-                data=cb_data['role_id'])))
+        keyboard.add(
+            InlineKeyboardButton(
+                "Delete role",
+                callback_data=cb.generic.new(
+                    state=Generic.CALLBACK_HANDLE,
+                    action=Role.Edit.DELETE,
+                    data=cb_data["role_id"],
+                ),
+            )
+        )
     return keyboard
 
 
 def get_role_permissions(
-        action_class: Role.Edit.Permissions | Role.Create.Permissions,
-        role):
+    action_class: Role.Edit.Permissions | Role.Create.Permissions, role
+):
     keyboard = InlineKeyboardMarkup()
 
-    cb_data = {
-        'state': '',
-        'role_id': role['id']
-    }
+    cb_data = {"state": "", "role_id": role["id"]}
 
-    keyboard.add(InlineKeyboardButton(
-        'Done',
-        callback_data=cb.role_permissions.new(
-            action=action_class.DONE,
-            subject_id='',
-            action_id='',
-            **cb_data)))
-    permissions = dict(loads(role['permissions']))
+    keyboard.add(
+        InlineKeyboardButton(
+            "Done",
+            callback_data=cb.role_permissions.new(
+                action=action_class.DONE, subject_id="", action_id="", **cb_data
+            ),
+        )
+    )
+    permissions = dict(loads(role["permissions"]))
 
     for subject_id, subject_name in ALL_SUBJECTS.items():
         if permissions[subject_id] == list(ALL_ACTIONS.keys()):
-            checked = '✅ '
+            checked = "✅ "
         elif permissions[subject_id]:
-            checked = '🟡 '
+            checked = "🟡 "
         else:
-            checked = '❌ '
-        keyboard.add(InlineKeyboardButton(
-            checked+subject_name,
-            callback_data=cb.role_permissions.new(
-                action=action_class.SUBJECT,
-                subject_id=subject_id,
-                action_id='',
-                **cb_data
+            checked = "❌ "
+        keyboard.add(
+            InlineKeyboardButton(
+                checked + subject_name,
+                callback_data=cb.role_permissions.new(
+                    action=action_class.SUBJECT,
+                    subject_id=subject_id,
+                    action_id="",
+                    **cb_data
+                ),
             )
-        ))
+        )
     return keyboard
 
 
-def get_role_permission(action_class: Role.Edit.Permissions | Role.Create.Permissions,
-                        role,
-                        subject_id):
+def get_role_permission(
+    action_class: Role.Edit.Permissions | Role.Create.Permissions, role, subject_id
+):
     keyboard = InlineKeyboardMarkup()
 
-    cb_data = {
-        'state': '',
-        'role_id': role['id']
-    }
+    cb_data = {"state": "", "role_id": role["id"]}
 
-    keyboard.add(InlineKeyboardButton(
-        'Back',
-        callback_data=cb.role_permissions.new(
-            action=action_class.BACK,
-            subject_id='',
-            action_id='',
-            **cb_data
-        )))
-    permissions = dict(loads(role['permissions']))
+    keyboard.add(
+        InlineKeyboardButton(
+            "Back",
+            callback_data=cb.role_permissions.new(
+                action=action_class.BACK, subject_id="", action_id="", **cb_data
+            ),
+        )
+    )
+    permissions = dict(loads(role["permissions"]))
     keyboard
 
     if permissions[subject_id] == list(ALL_ACTIONS.keys()):
-        checked = '✅ '
+        checked = "✅ "
     else:
-        checked = '❌ '
-    keyboard.add(InlineKeyboardButton(
-        checked+'All permissions',
-        callback_data=cb.role_permissions.new(
-                action=action_class.ALL,
-                subject_id=subject_id,
-                action_id='',
-                **cb_data
+        checked = "❌ "
+    keyboard.add(
+        InlineKeyboardButton(
+            checked + "All permissions",
+            callback_data=cb.role_permissions.new(
+                action=action_class.ALL, subject_id=subject_id, action_id="", **cb_data
+            ),
         )
-    ))
+    )
 
     for action_id, action_name in ALL_ACTIONS.items():
         if action_id in permissions[subject_id]:
-            checked = '✅ '
+            checked = "✅ "
         else:
-            checked = '❌ '
-        keyboard.add(InlineKeyboardButton(
-            checked+action_name.capitalize(),
-            callback_data=cb.role_permissions.new(
-                action=action_class.SPECIFIC,
-                subject_id=subject_id,
-                action_id=action_id,
-                **cb_data
+            checked = "❌ "
+        keyboard.add(
+            InlineKeyboardButton(
+                checked + action_name.capitalize(),
+                callback_data=cb.role_permissions.new(
+                    action=action_class.SPECIFIC,
+                    subject_id=subject_id,
+                    action_id=action_id,
+                    **cb_data
+                ),
             )
-        ))
+        )
 
     return keyboard
