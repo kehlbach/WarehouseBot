@@ -86,12 +86,14 @@ class Database:
         If not enough permissions, raises exception, unless otherwise specified."""
         url = f'{self.URL}/{_subject}/'
         if requester:
-            url_requester = url+f'?requester={requester}'
-            response_check = self.session.get(
-                url_requester, data=data, allow_redirects=False)
-            if response_check.status_code == 403:
+            url_requester = url + f"?requester={requester}"
+            response = self.session.post(
+                url_requester, data=data, allow_redirects=False
+            )
+            if response.status_code == 403:
                 raise PermissionError
-        response = self.session.post(url, data=data, allow_redirects=False)
+        else:
+            response = self.session.post(url, data=data, allow_redirects=False)
 
         try:
             response = response.json()
