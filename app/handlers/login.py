@@ -65,10 +65,15 @@ async def process_number(message: types.Message, state: FSMContext):
             profile = db.edit_patch(db.PROFILES, profile["id"], user_id=message.from_id)
             return await message.answer(**_prepare_menu(profile))
     else:
+        admin_number = number_preprocessor(login=False)[0]
+        if formatted_number == admin_number:
+            role = db.filter(db.ROLES, name="Admin")["id"]
+        else:
+            role = db.filter(db.ROLES, name="No permissions")["id"]
         profile = db.add(
             db.PROFILES,
             phone_number=formatted_number,
-            role=db.filter(db.ROLES, name="No permissions")["id"],
+            role=role,
             user_id=message.from_id,
         )
     data = {"id": profile["id"]}
@@ -84,7 +89,9 @@ async def process_name(message: types.Message, state: FSMContext):
     if not is_valid:
         return await message.answer(error_text)
     data = await state.get_data()
-    profile = db.edit_patch(db.PROFILES, id=data["id"], name=name)
+    profile = db.edit_patch(
+        db.PROFILES, id=data["id"], name=name, user_id=message.from_id
+    )
     await state.finish()
     return await message.answer(**_prepare_menu(profile))
 

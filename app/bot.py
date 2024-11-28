@@ -48,33 +48,37 @@ async def on_startup(dispatcher: Dispatcher) -> None:
     except phonenumbers.NumberParseException:
         logging.error("🔴 Admin phone number is incorrect.")
 
-    no_permissions = db.filter(db.ROLES, name="No permissions")
-    if not no_permissions:
-        db.add(db.ROLES, name="No permissions")
-    admin_role = db.filter(db.ROLES, name="Admin")
-    if not admin_role:
-        db.add(db.ROLES, name="Admin")
+    try:
+        no_permissions = db.filter(db.ROLES, name="No permissions")
+        if not no_permissions:
+            db.add(db.ROLES, name="No permissions")
         admin_role = db.filter(db.ROLES, name="Admin")
-        for subject in db.get(db.SUBJECTS).keys():
-            for action in db.get(db.ACTIONS).keys():
-                db.add(
-                    db.ROLE_PERMISSIONS,
-                    role=admin_role["id"],
-                    subject=subject,
-                    action=action,
-                )
-    admin = db.filter(db.PROFILES, phone_number=formatted_number)
-    if not admin:
-        db.add(
-            db.PROFILES,
-            phone_number=formatted_number,
-            role=admin_role["id"],
-            user_id=formatted_number,
+        if not admin_role:
+            db.add(db.ROLES, name="Admin")
+            admin_role = db.filter(db.ROLES, name="Admin")
+            for subject in db.get(db.SUBJECTS).keys():
+                for action in db.get(db.ACTIONS).keys():
+                    db.add(
+                        db.ROLE_PERMISSIONS,
+                        role=admin_role["id"],
+                        subject=subject,
+                        action=action,
+                    )
+        admin = db.filter(db.PROFILES, phone_number=formatted_number)
+        if not admin:
+            db.add(
+                db.PROFILES,
+                phone_number=formatted_number,
+                role=admin_role["id"],
+                user_id="",
+            )
+        no_category = db.filter(db.CATEGORIES, name="No category")
+        if not no_category:
+            db.add(db.CATEGORIES, name="No category")
+    except Exception as e:
+        logging.error(
+            "🔴 Failed to ensure initial data in Database.\nError:\n" + str(e)
         )
-    no_category = db.filter(db.CATEGORIES, name="No category")
-    if not no_category:
-        db.add(db.CATEGORIES, name="No category")
-
     await dispatcher.bot.set_my_commands(
         [types.BotCommand(command="/start", description="Start the bot")]
     )
