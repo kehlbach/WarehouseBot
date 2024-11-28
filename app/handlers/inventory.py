@@ -21,12 +21,14 @@ async def view_by_department(
     if callback_data["data"]:  # specific department
         department = db.get(db.DEPARTMENTS, callback_data["data"])
         text = "Department: {}\nInventory".format(department["repr"])
-        data = db.filter(db.INVENTORY_SUMMARY, department=department["id"])
+        data = db.filter(
+            db.INVENTORY_SUMMARY, department=department["id"], return_list=True
+        )
         headers = ["Product", "Quantity", "Unit"]
         rows = [[d["product_name"], d["quantity"], d["product_units"]] for d in data]
     else:
         text = "All departments\nInventory"
-        data = db.filter(db.INVENTORY_SUMMARY)
+        data = db.filter(db.INVENTORY_SUMMARY, return_list=True)
         headers = ["Department", "Product", "Quantity", "Unit"]
         rows = [
             [d["department_name"], d["product_name"], d["quantity"], d["product_units"]]
@@ -93,13 +95,16 @@ async def view_by_date(message: Message, state: FSMContext):
             department["repr"], message.text
         )
         data = db.filter(
-            db.INVENTORY_SUMMARY, department=department["id"], date=message.text
+            db.INVENTORY_SUMMARY,
+            department=department["id"],
+            date=message.text,
+            return_list=True,
         )
         headers = ["Product", "Quantity", "Unit"]
         rows = [[d["product_name"], d["quantity"], d["product_units"]] for d in data]
     else:
         text = "All departments\nInventory"
-        data = db.filter(db.INVENTORY_SUMMARY, date=message.text)
+        data = db.filter(db.INVENTORY_SUMMARY, date=message.text, return_list=True)
         headers = ["Department", "Product", "Quantity", "Unit"]
         rows = [
             [d["department_name"], d["product_name"], d["quantity"], d["product_units"]]
